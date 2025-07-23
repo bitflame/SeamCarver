@@ -90,65 +90,58 @@ public class SeamCarver {
         // Go through each row update edgeTo and distTo
         double leftParentCost, middleParentCost, rightParentCost, currentNodeValue;
         for (int i = 0; i < picture.height(); i++) {
+
             for (int j = 0; j < picture.width(); j++) {
+                middleParentCost = distTo[j];
+                currentNodeValue = matrix[i][j];
                 if (i == 0) {
                     distTo[j] = matrix[i][j];
                     edgeTo[i][j] = -1;
                 }
                 else if (j == 0) {
                     // there is not left parent - just middle and right
-                    middleParentCost = distTo[j];
                     rightParentCost = distTo[j + 1];
-                    if (middleParentCost < rightParentCost) {
-                        distTo[j] = middleParentCost + matrix[i][j];
+
+                    if (middleParentCost <= rightParentCost) {
+                        distTo[j] = middleParentCost + currentNodeValue;
                         edgeTo[i][j] = j;
                     }
                     else {
-                        distTo[j] = rightParentCost + matrix[i][j];
+                        distTo[j] = rightParentCost + currentNodeValue;
                         edgeTo[i][j] = j + 1;
                     }
                 }
                 else if (j == picture.width() - 1) {
                     // there is no right parent - just middle and left
-                    middleParentCost = distTo[j];
                     leftParentCost = distTo[j - 1];
                     if (middleParentCost < leftParentCost) {
-                        distTo[j] = distTo[j] + matrix[i][j];
+                        distTo[j] = middleParentCost + currentNodeValue;
                         edgeTo[i][j] = j;
                     }
                     else {
-                        distTo[j] = distTo[j - 1] + matrix[i][j];
+                        distTo[j] = leftParentCost + currentNodeValue;
                         edgeTo[i][j] = j - 1;
                     }
                 }
                 else {
                     leftParentCost = distTo[j - 1];
-                    middleParentCost = distTo[j];
                     rightParentCost = distTo[j + 1];
-                    currentNodeValue = matrix[i][j];
                     double leftSum = currentNodeValue + leftParentCost;
                     double middleSum = currentNodeValue + middleParentCost;
                     double rightSum = currentNodeValue + rightParentCost;
-                    if (leftSum < middleSum && leftSum < rightSum) {
+                    if (leftSum < middleSum) {
                         distTo[j] = leftSum;
                         edgeTo[i][j] = j - 1;
                     }
-                    else if (middleSum < leftSum && middleSum < rightSum) {
+                    else if (rightSum < middleSum) {
+                        distTo[j] = rightSum;
+                        edgeTo[i][j] = j + 11;
+                    }
+                    else {
                         distTo[j] = middleSum;
                         edgeTo[i][j] = j;
                     }
-                    else if (rightSum < middleSum && rightSum < leftSum) {
-                        distTo[j] = rightSum;
-                        edgeTo[i][j] = j + 1;
-                    }
-                    else {
-                        throw new RuntimeException(
-                                "There is a matrix cost that you did not account for at matrix location"
-                                        + i + j + "LeftSum: " + leftSum + "Middle Sum: " + middleSum
-                                        + "RightSum: " + rightSum);
-                    }
                 }
-                matrix[i][j] = energy(j, i);
             }
         }
         // when done find the cell with minimal cost, and trace edgeTo to find the path - return the indices
