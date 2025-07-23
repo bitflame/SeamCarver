@@ -88,11 +88,11 @@ public class SeamCarver {
         }
         printMatrix(matrix);
         // Go through each row update edgeTo and distTo
-        double leftParentCost, middleParentCost, rightParentCost;
+        double leftParentCost, middleParentCost, rightParentCost, currentNodeValue;
         for (int i = 0; i < picture.height(); i++) {
             for (int j = 0; j < picture.width(); j++) {
                 if (i == 0) {
-                    distTo[i] = matrix[i][j];
+                    distTo[j] = matrix[i][j];
                     edgeTo[i][j] = -1;
                 }
                 else if (j == 0) {
@@ -100,11 +100,11 @@ public class SeamCarver {
                     middleParentCost = distTo[j];
                     rightParentCost = distTo[j + 1];
                     if (middleParentCost < rightParentCost) {
-                        distTo[j] = distTo[j] + matrix[i][j];
+                        distTo[j] = middleParentCost + matrix[i][j];
                         edgeTo[i][j] = j;
                     }
                     else {
-                        distTo[j] = distTo[j + 1] + matrix[i][j];
+                        distTo[j] = rightParentCost + matrix[i][j];
                         edgeTo[i][j] = j + 1;
                     }
                 }
@@ -125,19 +125,27 @@ public class SeamCarver {
                     leftParentCost = distTo[j - 1];
                     middleParentCost = distTo[j];
                     rightParentCost = distTo[j + 1];
-                    if (leftParentCost < middleParentCost && leftParentCost < rightParentCost) {
-                        distTo[i] = leftParentCost + matrix[i][j];
+                    currentNodeValue = matrix[i][j];
+                    double leftSum = currentNodeValue + leftParentCost;
+                    double middleSum = currentNodeValue + middleParentCost;
+                    double rightSum = currentNodeValue + rightParentCost;
+                    if (leftSum < middleSum && leftSum < rightSum) {
+                        distTo[j] = leftSum;
                         edgeTo[i][j] = j - 1;
                     }
-                    else if (middleParentCost < leftParentCost
-                            && middleParentCost < rightParentCost) {
-                        distTo[j] = middleParentCost + matrix[i][j];
+                    else if (middleSum < leftSum && middleSum < rightSum) {
+                        distTo[j] = middleSum;
                         edgeTo[i][j] = j;
                     }
-                    else if (rightParentCost < middleParentCost
-                            && rightParentCost < leftParentCost) {
-                        distTo[j] = rightParentCost + matrix[i][j];
+                    else if (rightSum < middleSum && rightSum < leftSum) {
+                        distTo[j] = rightSum;
                         edgeTo[i][j] = j + 1;
+                    }
+                    else {
+                        throw new RuntimeException(
+                                "There is a matrix cost that you did not account for at matrix location"
+                                        + i + j + "LeftSum: " + leftSum + "Middle Sum: " + middleSum
+                                        + "RightSum: " + rightSum);
                     }
                 }
                 matrix[i][j] = energy(j, i);
