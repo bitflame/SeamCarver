@@ -5,6 +5,7 @@
  **************************************************************************** */
 
 import edu.princeton.cs.algs4.Picture;
+import edu.princeton.cs.algs4.Stack;
 
 import java.awt.Color;
 
@@ -33,7 +34,7 @@ public class SeamCarver {
 
     // energy of pixel at column x and row y
     public double energy(int x, int y) {
-        if (x == 0 || x == picture.width() - 1 || y == 0 || y == picture.height() - 1)
+        if (x <= 0 || x >= picture.width() - 1 || y <= 0 || y >= picture.height() - 1)
             return 1000.00;
         Color left = picture.get(x - 1, y);
         Color right = picture.get(x + 1, y);
@@ -79,27 +80,34 @@ public class SeamCarver {
     public int[] findVerticalSeam() {
         double[][] energy = new double[picture.height()][picture.width()];
         int[][] edgeTo = new int[picture.height()][picture.width()];
-        double[][] distTo = new double[picture.width()][picture.width()];
+        double[][] distTo = new double[picture.height()][picture.width()];
         int[] verticalSean = new int[picture.width()];
+        Stack<Integer> path = new Stack<>();
         double leftParentDistance, middleParentDistance, rightParentDistance;
+        int rowMinIndex = 0;
         for (int i = 0; i < picture.height(); i++) {
             for (int j = 0; j < picture.width(); j++) {
                 energy[i][j] = energy(j, i);
-                if (i == 0 || j == 0 || j == picture.width() - 1) {
+                if (i == 0) {
                     distTo[i][j] = energy[i][j];
                     edgeTo[i][j] = -1;
                 }
-                else {
-                    leftParentDistance = distTo[i - 1][j - 1];
+                else if (j == 0) {
                     middleParentDistance = distTo[i - 1][j];
                     rightParentDistance = distTo[i - 1][j + 1];
-                    energy[i][j] = energy(i, j);
-                    if (leftParentDistance > middleParentDistance
-                            || leftParentDistance > rightParentDistance) {
-                        if (middleParentDistance > rightParentDistance) {
-                            distTo[i][j] = rightParentDistance + energy[i][j];
-                            edgeTo[i][j] = j + 1;
-                        }
+                    if (middleParentDistance > rightParentDistance) {
+                        distTo[i][j] = rightParentDistance + energy[i][j];
+                        edgeTo[i][j] = j + 1;
+                    }
+                    else {
+                        distTo[i][j] = middleParentDistance + energy[i][j];
+                        edgeTo[i][j] = j;
+                    }
+                }
+                else if (j == picture.width() - 1) {
+                    leftParentDistance = distTo[i - 1][j - 1];
+                    middleParentDistance = distTo[i - 1][j];
+                    if (leftParentDistance > middleParentDistance) {
                         distTo[i][j] = middleParentDistance + energy[i][j];
                         edgeTo[i][j] = j;
                     }
@@ -108,8 +116,40 @@ public class SeamCarver {
                         edgeTo[i][j] = j - 1;
                     }
                 }
+                else {
+                    leftParentDistance = distTo[i - 1][j - 1];
+                    middleParentDistance = distTo[i - 1][j];
+                    rightParentDistance = distTo[i - 1][j + 1];
+                    if (leftParentDistance > middleParentDistance
+                            || leftParentDistance > rightParentDistance) {
+                        if (middleParentDistance > rightParentDistance) {
+                            distTo[i][j] = rightParentDistance + energy[i][j];
+                            edgeTo[i][j] = j + 1;
+                            rowMinIndex = j + 1;
+                            if (i == picture.height() - 1) path.push(j +1);
+                        }
+                        distTo[i][j] = middleParentDistance + energy[i][j];
+                        edgeTo[i][j] = j;
+                        rowMinIndex = j;
+                        if (i == picture.height() - 1) path.push(j);
+                    }
+                    else {
+                        distTo[i][j] = leftParentDistance + energy[i][j];
+                        edgeTo[i][j] = j - 1;
+                        rowMinIndex = j - 1;
+                        if (i == picture.height() - 1) path.push(j -1);
+                    }
+                }
+                if (i == picture.height() - 1 && j == picture.width() - 1) {
+                    int tempRowCounter = i;
+                    while (rowMinIndex != -1) {
+                        path.push(rowMinIndex);
+                        rowMinIndex = edgeTo[tempRowCounter--][rowMinIndex];
+                    }
+                }
             }
         }
+        // todo - Go through the last row of the energy matrix, find the minimum's index and the follow the edgeTo...
         printMyTwoDimensionalArray(edgeTo);
         return verticalSean;
     }
@@ -126,7 +166,7 @@ public class SeamCarver {
     private void printMyTwoDimensionalArray(int[][] matrix) {
         for (int i = 0; i < picture.height(); i++) {
             for (int j = 0; j < picture.width(); j++) {
-                System.out.printf("%9.0f", matrix[i][j]);
+                System.out.printf("%9d", matrix[i][j]);
             }
             System.out.println();
         }
