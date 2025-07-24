@@ -77,74 +77,15 @@ public class SeamCarver {
 
     // sequence of indices for vertical seam
     public int[] findVerticalSeam() {
-        double[][] matrix = new double[picture.height()][picture.width()];
+        double[][] energy = new double[picture.height()][picture.width()];
         int[][] edgeTo = new int[picture.height()][picture.width()];
-        double[] distTo = new double[picture.width()];
+        double[][] distTo = new double[picture.width()][picture.width()];
         int[] verticalSean = new int[picture.width()];
         for (int i = 0; i < picture.height(); i++) {
             for (int j = 0; j < picture.width(); j++) {
-                matrix[i][j] = energy(j, i);
+                energy[i][j] = energy(j, i);
             }
         }
-        printMatrix(matrix);
-        // Go through each row update edgeTo and distTo
-        double leftParentCost, middleParentCost, rightParentCost, currentNodeValue;
-        for (int i = 0; i < picture.height(); i++) {
-
-            for (int j = 0; j < picture.width(); j++) {
-                middleParentCost = distTo[j];
-                currentNodeValue = matrix[i][j];
-                if (i == 0) {
-                    distTo[j] = matrix[i][j];
-                    edgeTo[i][j] = -1;
-                }
-                else if (j == 0) {
-                    // there is not left parent - just middle and right
-                    rightParentCost = distTo[j + 1];
-
-                    if (middleParentCost <= rightParentCost) {
-                        distTo[j] = middleParentCost + currentNodeValue;
-                        edgeTo[i][j] = j;
-                    }
-                    else {
-                        distTo[j] = rightParentCost + currentNodeValue;
-                        edgeTo[i][j] = j + 1;
-                    }
-                }
-                else if (j == picture.width() - 1) {
-                    // there is no right parent - just middle and left
-                    leftParentCost = distTo[j - 1];
-                    if (middleParentCost < leftParentCost) {
-                        distTo[j] = middleParentCost + currentNodeValue;
-                        edgeTo[i][j] = j;
-                    }
-                    else {
-                        distTo[j] = leftParentCost + currentNodeValue;
-                        edgeTo[i][j] = j - 1;
-                    }
-                }
-                else {
-                    leftParentCost = distTo[j - 1];
-                    rightParentCost = distTo[j + 1];
-                    double leftSum = currentNodeValue + leftParentCost;
-                    double middleSum = currentNodeValue + middleParentCost;
-                    double rightSum = currentNodeValue + rightParentCost;
-                    if (leftSum < middleSum) {
-                        distTo[j] = leftSum;
-                        edgeTo[i][j] = j - 1;
-                    }
-                    else if (rightSum < middleSum) {
-                        distTo[j] = rightSum;
-                        edgeTo[i][j] = j + 11;
-                    }
-                    else {
-                        distTo[j] = middleSum;
-                        edgeTo[i][j] = j;
-                    }
-                }
-            }
-        }
-        // when done find the cell with minimal cost, and trace edgeTo to find the path - return the indices
         return verticalSean;
     }
 
@@ -166,6 +107,24 @@ public class SeamCarver {
     // remove vertical seam from current picture
     public void removeVerticalSeam(int[] seam) {
 
+    }
+
+    private class Pixel implements Comparable<Pixel> {
+        int x;
+        int y;
+        double energy;
+
+        Pixel(int x, int y, double energy) {
+            this.x = x;
+            this.y = y;
+            this.energy = energy;
+        }
+
+        public int compareTo(Pixel o) {
+            if (this.energy > o.energy) return 1;
+            if (this.energy < o.energy) return -1;
+            return 0;
+        }
     }
 
     //  unit testing (optional)
