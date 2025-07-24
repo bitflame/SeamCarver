@@ -81,18 +81,51 @@ public class SeamCarver {
         int[][] edgeTo = new int[picture.height()][picture.width()];
         double[][] distTo = new double[picture.width()][picture.width()];
         int[] verticalSean = new int[picture.width()];
+        double leftParentDistance, middleParentDistance, rightParentDistance;
         for (int i = 0; i < picture.height(); i++) {
             for (int j = 0; j < picture.width(); j++) {
                 energy[i][j] = energy(j, i);
+                if (i == 0 || j == 0 || j == picture.width() - 1) {
+                    distTo[i][j] = energy[i][j];
+                    edgeTo[i][j] = -1;
+                }
+                else {
+                    leftParentDistance = distTo[i - 1][j - 1];
+                    middleParentDistance = distTo[i - 1][j];
+                    rightParentDistance = distTo[i - 1][j + 1];
+                    energy[i][j] = energy(i, j);
+                    if (leftParentDistance > middleParentDistance
+                            || leftParentDistance > rightParentDistance) {
+                        if (middleParentDistance > rightParentDistance) {
+                            distTo[i][j] = rightParentDistance + energy[i][j];
+                            edgeTo[i][j] = j + 1;
+                        }
+                        distTo[i][j] = middleParentDistance + energy[i][j];
+                        edgeTo[i][j] = j;
+                    }
+                    else {
+                        distTo[i][j] = leftParentDistance + energy[i][j];
+                        edgeTo[i][j] = j - 1;
+                    }
+                }
             }
         }
+        printMyTwoDimensionalArray(edgeTo);
         return verticalSean;
     }
 
-    private void printMatrix(double[][] matrix) {
+    private void printMyTwoDimensionalArray(double[][] matrix) {
         for (int i = 0; i < picture.height(); i++) {
             for (int j = 0; j < picture.width(); j++) {
-                matrix[i][j] = energy(j, i);
+                System.out.printf("%9.0f", matrix[i][j]);
+            }
+            System.out.println();
+        }
+    }
+
+    private void printMyTwoDimensionalArray(int[][] matrix) {
+        for (int i = 0; i < picture.height(); i++) {
+            for (int j = 0; j < picture.width(); j++) {
                 System.out.printf("%9.0f", matrix[i][j]);
             }
             System.out.println();
