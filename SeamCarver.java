@@ -125,32 +125,34 @@ public class SeamCarver {
                         if (middleParentDistance > rightParentDistance) {
                             distTo[i][j] = rightParentDistance + energy[i][j];
                             edgeTo[i][j] = j + 1;
-                            rowMinIndex = j + 1;
-                            if (i == picture.height() - 1) path.push(j +1);
                         }
                         distTo[i][j] = middleParentDistance + energy[i][j];
                         edgeTo[i][j] = j;
-                        rowMinIndex = j;
-                        if (i == picture.height() - 1) path.push(j);
                     }
                     else {
                         distTo[i][j] = leftParentDistance + energy[i][j];
                         edgeTo[i][j] = j - 1;
-                        rowMinIndex = j - 1;
-                        if (i == picture.height() - 1) path.push(j -1);
                     }
                 }
-                if (i == picture.height() - 1 && j == picture.width() - 1) {
-                    int tempRowCounter = i;
-                    while (rowMinIndex != -1) {
-                        path.push(rowMinIndex);
-                        rowMinIndex = edgeTo[tempRowCounter--][rowMinIndex];
-                    }
-                }
+
+
             }
         }
-        // todo - Go through the last row of the energy matrix, find the minimum's index and the follow the edgeTo...
         printMyTwoDimensionalArray(edgeTo);
+        // todo - Go through the last row of the energy matrix, find the minimum's index and the follow the edgeTo...
+        double minDistance = Double.MAX_VALUE;
+        int minIndex = 0;
+        for (int i = 0; i < picture.width(); i++) {
+            if (minDistance > distTo[picture.height() - 1][i]) {
+                minDistance = distTo[picture.height() - 1][i];
+                minIndex = i;
+            }
+        }
+        int rowCounter = picture.height() - 1;
+        while (minIndex != -1) {
+            path.push(minIndex);
+            minIndex = edgeTo[rowCounter--][minIndex];
+        }
         return verticalSean;
     }
 
