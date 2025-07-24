@@ -81,10 +81,8 @@ public class SeamCarver {
         double[][] energy = new double[picture.height()][picture.width()];
         int[][] edgeTo = new int[picture.height()][picture.width()];
         double[][] distTo = new double[picture.height()][picture.width()];
-        int[] verticalSean = new int[picture.width()];
-        Stack<Integer> path = new Stack<>();
+        int[] verticalSeam = new int[picture.height()];
         double leftParentDistance, middleParentDistance, rightParentDistance;
-        int rowMinIndex = 0;
         for (int i = 0; i < picture.height(); i++) {
             for (int j = 0; j < picture.width(); j++) {
                 energy[i][j] = energy(j, i);
@@ -150,10 +148,10 @@ public class SeamCarver {
         }
         int rowCounter = picture.height() - 1;
         while (minIndex != -1) {
-            path.push(minIndex);
+            verticalSeam[rowCounter]=minIndex;
             minIndex = edgeTo[rowCounter--][minIndex];
         }
-        return verticalSean;
+        return verticalSeam;
     }
 
     private void printMyTwoDimensionalArray(double[][] matrix) {
