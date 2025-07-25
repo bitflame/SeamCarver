@@ -12,7 +12,7 @@ import java.awt.Color;
 public class SeamCarver {
     private Picture picture;
     private double[][] energy;
-    private int[][] edgeTo;
+    private int[][] verticalEdgeTo;
     private double[][] verticalDistanceTo;
     private double[][] horizontalDistanceTo;
     private int[][] horizontalEdgeTo;
@@ -26,7 +26,7 @@ public class SeamCarver {
         pictureHeight = picture.height();
         pictureWidth = picture.width();
         energy = new double[pictureHeight][pictureWidth];
-        edgeTo = new int[pictureHeight][pictureWidth];
+        verticalEdgeTo = new int[pictureHeight][pictureWidth];
         horizontalEdgeTo = new int[pictureHeight][pictureWidth];
         verticalDistanceTo = new double[pictureHeight][pictureWidth];
         horizontalDistanceTo = new double[pictureHeight][pictureWidth];
@@ -36,8 +36,15 @@ public class SeamCarver {
         for (int i = 0; i < pictureHeight; i++) {
             for (int j = 0; j < pictureWidth; j++) {
                 energy[i][j] = energy(j, i);
-                verticalDistanceTo[i][j] = Double.POSITIVE_INFINITY;
-                horizontalDistanceTo[i][j] = Double.POSITIVE_INFINITY;
+                if (i == 0 || i == pictureHeight - 1 || j == 0 || j == pictureWidth - 1) {
+                    verticalDistanceTo[i][j] = energy[i][j];
+                    horizontalDistanceTo[i][j] = energy[i][j];
+
+                }
+                else {
+                    verticalDistanceTo[i][j] = Double.POSITIVE_INFINITY;
+                    horizontalDistanceTo[i][j] = Double.POSITIVE_INFINITY;
+                }
             }
         }
     }
@@ -46,7 +53,7 @@ public class SeamCarver {
         if (x == 0 || y == 0 || x == pictureHeight - 1 || y == pictureWidth - 1) {
             verticalDistanceTo[x][y] = energy[x][y];
             horizontalDistanceTo[x][y] = energy[x][y];
-            edgeTo[x][y] = -1;
+            verticalEdgeTo[x][y] = -1;
             horizontalEdgeTo[x][y] = -1;
         }
         if (horizontalDistanceTo[x][y] > horizontalDistanceTo[x - 1][y - 1] + energy[x][y]) {
@@ -62,28 +69,34 @@ public class SeamCarver {
 
     // relax the pixels
     private void verticalRelax(int x, int y) {
-        if (x == 0 || y == 0 || x == pictureHeight - 1 || y == pictureWidth - 1) {
-            verticalDistanceTo[x][y] = energy[x][y];
-            edgeTo[x][y] = -1;
-        }
-        else if (y >= 1 || y < pictureWidth) {
+        if (y == 1) {
             if (verticalDistanceTo[x][y] > verticalDistanceTo[x - 1][y] + energy[x][y]) {
                 verticalDistanceTo[x][y] = verticalDistanceTo[x - 1][y] + energy[x][y];
-                edgeTo[x][y] = y;
+                verticalEdgeTo[x][y] = y;
             }
         }
-        else if (y > 0 && y < pictureWidth - 1) {
+        else if (y == pictureWidth - 2 ) {
             if (verticalDistanceTo[x][y] > verticalDistanceTo[x - 1][y - 1] + energy[x][y]) {
                 verticalDistanceTo[x][y] = verticalDistanceTo[x - 1][y - 1] + energy[x][y];
-                edgeTo[x][y] = y - 1;
+                verticalEdgeTo[x][y] = y - 1;
             }
             if (verticalDistanceTo[x][y] > verticalDistanceTo[x - 1][y] + energy[x][y]) {
                 verticalDistanceTo[x][y] = verticalDistanceTo[x - 1][y] + energy[x][y];
-                edgeTo[x][y] = y;
+                verticalEdgeTo[x][y] = y;
+            }
+        }
+        else {
+            if (verticalDistanceTo[x][y] > verticalDistanceTo[x - 1][y - 1] + energy[x][y]) {
+                verticalDistanceTo[x][y] = verticalDistanceTo[x - 1][y - 1] + energy[x][y];
+                verticalEdgeTo[x][y] = y - 1;
+            }
+            if (verticalDistanceTo[x][y] > verticalDistanceTo[x - 1][y] + energy[x][y]) {
+                verticalDistanceTo[x][y] = verticalDistanceTo[x - 1][y] + energy[x][y];
+                verticalEdgeTo[x][y] = y;
             }
             if (verticalDistanceTo[x][y] > verticalDistanceTo[x - 1][y + 1] + energy[x][y]) {
                 verticalDistanceTo[x][y] = verticalDistanceTo[x - 1][y + 1] + energy[x][y];
-                edgeTo[x][y] = y + 1;
+                verticalEdgeTo[x][y] = y + 1;
             }
         }
     }
@@ -157,15 +170,15 @@ public class SeamCarver {
         int columnCounter = pictureWidth - 1;
         while (minIndex != -1) {
             horizontalSeam[columnCounter] = minIndex;
-            minIndex = edgeTo[columnCounter--][minIndex];
+            minIndex = verticalEdgeTo[columnCounter--][minIndex];
         }
         return horizontalSeam;
     }
 
     // sequence of indices for vertical seam
     public int[] findVerticalSeam() {
-        for (int i = 0; i < pictureHeight; i++) {
-            for (int j = 0; j < pictureWidth; j++) {
+        for (int i = 1; i < pictureHeight - 1; i++) {
+            for (int j = 1; j < pictureWidth - 1; j++) {
                 verticalRelax(i, j);
             }
         }
@@ -181,7 +194,7 @@ public class SeamCarver {
         verticalSeam[rowCounter--] = minIndex - 1;
         do {
             verticalSeam[rowCounter] = minIndex;
-            minIndex = edgeTo[rowCounter--][minIndex];
+            minIndex = verticalEdgeTo[rowCounter--][minIndex];
 
         } while (rowCounter > 0);
         verticalSeam[rowCounter] = minIndex - 1;
@@ -237,22 +250,34 @@ public class SeamCarver {
     //  unit testing (optional)
     public static void main(String[] args) {
         SeamCarver seamCarver = new SeamCarver(new Picture("3x4.png"));
-        System.out.println("Here is the vertical seam:");
+        System.out.println("Here is the vertical seam for 3x4 file:");
         for (int i : seamCarver.findVerticalSeam()) {
             System.out.printf("%d ", i);
         }
+        System.out.println();
+        seamCarver = new SeamCarver(new Picture("3x7.png"));
+        System.out.println("Here is the vertical seam for 3x7 file:");
+        for (int i : seamCarver.findVerticalSeam()) {
+            System.out.printf("%d ", i);
+        }
+        System.out.println();
+        // Vertical seam: { 1 2 1 1 2 1 }
+        // 1000.00  1000.00* 1000.00  1000.00
+        // 1000.00   275.66   173.21* 1000.00
+        // 1000.00   173.21*  321.01  1000.00
+        // 1000.00   171.80*  195.63  1000.00
+        // 1000.00   270.93   188.15* 1000.00
+        // 1000.00  1000.00* 1000.00  1000.00
+        // Total energy = 2706.370116
+        seamCarver = new SeamCarver(new Picture("4x6.png"));
+        // seamCarver.printMyTwoDimensionalArray(seamCarver.energy);
+        System.out.println("Here is the vertical seam for 4x6 file:");
+        for (int i : seamCarver.findVerticalSeam()) {
+            System.out.printf("%d ", i);
+        }
+        System.out.println();
         System.out.println("\n Here is the horizontal seam:");
         for (int i : seamCarver.findHorizontalSeam()) {
-            System.out.printf("%d ", i);
-        }
-        seamCarver = new SeamCarver(new Picture("3x7.png"));
-        System.out.println("Here is the vertical seam:");
-        for (int i : seamCarver.findVerticalSeam()) {
-            System.out.printf("%d ", i);
-        }
-        seamCarver = new SeamCarver(new Picture("4x6.png"));
-        System.out.println("Here is the vertical seam:");
-        for (int i : seamCarver.findVerticalSeam()) {
             System.out.printf("%d ", i);
         }
     }
