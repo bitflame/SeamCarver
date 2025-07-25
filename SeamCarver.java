@@ -90,6 +90,8 @@ public class SeamCarver {
             }
         }
         else {
+            // todo -- you need to compare the sum of cell's energy + any of the possible parents and then
+            // update the distance table
             if (verticalDistanceTo[x][y] > verticalDistanceTo[x - 1][y - 1] + energy[x][y]) {
                 verticalDistanceTo[x][y] = verticalDistanceTo[x - 1][y - 1] + energy[x][y];
                 verticalEdgeTo[x][y] = y - 1;
