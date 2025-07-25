@@ -16,21 +16,39 @@ public class SeamCarver {
     private double[][] distTo;
     private int[] verticalSeam;
     private int[] horizontalSeam;
+    private int pictureHeight, pictureWidth;
 
     // create a seam carver object based on the given picture
     public SeamCarver(Picture picture) {
-        energy = new double[picture.height()][picture.width()];
-        edgeTo = new int[picture.height()][picture.width()];
-        distTo = new double[picture.height()][picture.width()];
-        verticalSeam = new int[picture.height()];
-        horizontalSeam = new int[picture.width()];
         this.picture = new Picture(picture);
-        for (int i = 0; i < picture.height(); i++) {
-            for (int j = 0; j < picture.width(); j++) {
+        pictureHeight = picture.height();
+        pictureWidth = picture.width();
+        energy = new double[pictureHeight][pictureWidth];
+        edgeTo = new int[pictureHeight][pictureWidth];
+        distTo = new double[pictureHeight][pictureWidth];
+        verticalSeam = new int[pictureHeight];
+        horizontalSeam = new int[pictureWidth];
+
+        for (int i = 0; i < pictureHeight; i++) {
+            for (int j = 0; j < pictureWidth; j++) {
                 energy[i][j] = energy(j, i);
+                distTo[i][j] = Double.POSITIVE_INFINITY;
+                if (i > 0 && i < pictureHeight - 1 && j > 0 && j < pictureWidth - 1) relax(i, j);
             }
         }
+        printMyTwoDimensionalArray(distTo);
     }
+
+    // relax the pixels
+    private void relax(int x, int y) {
+        if (distTo[x][y] > energy[x - 1][y - 1] + energy[x][y])
+            distTo[x][y] = energy[x - 1][y - 1] + energy[x][y];
+        else if (distTo[x][y] > energy[x - 1][y] + energy[x][y])
+            distTo[x][y] = energy[x - 1][y] + energy[x][y];
+        else if (distTo[x][x] > energy[x - 1][y + 1] + energy[x][y])
+            distTo[x][y] = energy[x - 1][y + 1] + energy[x][y];
+    }
+
 
     // current picture
     public Picture picture() {
@@ -39,17 +57,17 @@ public class SeamCarver {
 
     // width of current picture
     public int width() {
-        return picture.width();
+        return pictureWidth;
     }
 
     // height of current picture
     public int height() {
-        return picture.height();
+        return pictureHeight;
     }
 
     // energy of pixel at column x and row y
     public double energy(int x, int y) {
-        if (x <= 0 || x >= picture.width() - 1 || y <= 0 || y >= picture.height() - 1)
+        if (x <= 0 || x >= pictureWidth - 1 || y <= 0 || y >= pictureHeight - 1)
             return 1000.00;
         Color left = picture.get(x - 1, y);
         Color right = picture.get(x + 1, y);
@@ -90,8 +108,8 @@ public class SeamCarver {
     public int[] findHorizontalSeam() {
         double topParentDistance, middleParentDistance, bottomParentDistance;
         this.picture = new Picture(picture);
-        for (int i = 0; i < picture.height(); i++) {
-            for (int j = 0; j < picture.width(); j++) {
+        for (int i = 0; i < pictureHeight; i++) {
+            for (int j = 0; j < pictureWidth; j++) {
                 energy[i][j] = energy(j, i);
                 if (j == 0) {
                     distTo[i][j] = energy[i][j];
@@ -109,7 +127,7 @@ public class SeamCarver {
                         edgeTo[i][j] = j - 1;
                     }
                 }
-                else if (i == picture.height() - 1) {
+                else if (i == pictureHeight - 1) {
                     topParentDistance = distTo[i - 1][j - 1];
                     middleParentDistance = distTo[i][j - 1];
                     if (topParentDistance > middleParentDistance) {
@@ -143,13 +161,13 @@ public class SeamCarver {
         }
         double minDistance = Double.MAX_VALUE;
         int minIndex = 0;
-        for (int i = 0; i < picture.height(); i++) {
-            if (minDistance > distTo[i][picture.width() - 1]) {
-                minDistance = distTo[i][picture.width() - 1];
+        for (int i = 0; i < pictureHeight; i++) {
+            if (minDistance > distTo[i][pictureWidth - 1]) {
+                minDistance = distTo[i][pictureWidth - 1];
                 minIndex = i;
             }
         }
-        int columnCounter = picture.width() - 1;
+        int columnCounter = pictureWidth - 1;
         while (minIndex != -1) {
             horizontalSeam[columnCounter] = minIndex;
             minIndex = edgeTo[columnCounter--][minIndex];
@@ -160,8 +178,8 @@ public class SeamCarver {
     // sequence of indices for vertical seam
     public int[] findVerticalSeam() {
         double leftParentDistance, middleParentDistance, rightParentDistance;
-        for (int i = 0; i < picture.height(); i++) {
-            for (int j = 0; j < picture.width(); j++) {
+        for (int i = 0; i < pictureHeight; i++) {
+            for (int j = 0; j < pictureWidth; j++) {
                 if (i == 0) {
                     distTo[i][j] = energy[i][j];
                     edgeTo[i][j] = -1;
@@ -178,7 +196,7 @@ public class SeamCarver {
                         edgeTo[i][j] = j;
                     }
                 }
-                else if (j == picture.width() - 1) {
+                else if (j == pictureWidth - 1) {
                     leftParentDistance = distTo[i - 1][j - 1];
                     middleParentDistance = distTo[i - 1][j];
                     if (leftParentDistance > middleParentDistance) {
@@ -212,13 +230,13 @@ public class SeamCarver {
         }
         double minDistance = Double.MAX_VALUE;
         int minIndex = 0;
-        for (int i = 0; i < picture.width(); i++) {
-            if (minDistance > distTo[picture.height() - 1][i]) {
-                minDistance = distTo[picture.height() - 1][i];
+        for (int i = 0; i < pictureWidth; i++) {
+            if (minDistance > distTo[pictureHeight - 1][i]) {
+                minDistance = distTo[pictureHeight - 1][i];
                 minIndex = i;
             }
         }
-        int rowCounter = picture.height() - 1;
+        int rowCounter = pictureHeight - 1;
         while (minIndex != -1) {
             verticalSeam[rowCounter] = minIndex;
             minIndex = edgeTo[rowCounter--][minIndex];
@@ -227,8 +245,8 @@ public class SeamCarver {
     }
 
     private void printMyTwoDimensionalArray(double[][] matrix) {
-        for (int i = 0; i < picture.height(); i++) {
-            for (int j = 0; j < picture.width(); j++) {
+        for (int i = 0; i < pictureHeight; i++) {
+            for (int j = 0; j < pictureWidth; j++) {
                 System.out.printf("%9.0f", matrix[i][j]);
             }
             System.out.println();
@@ -236,8 +254,8 @@ public class SeamCarver {
     }
 
     private void printMyTwoDimensionalArray(int[][] matrix) {
-        for (int i = 0; i < picture.height(); i++) {
-            for (int j = 0; j < picture.width(); j++) {
+        for (int i = 0; i < pictureHeight; i++) {
+            for (int j = 0; j < pictureWidth; j++) {
                 System.out.printf("%9d", matrix[i][j]);
             }
             System.out.println();
