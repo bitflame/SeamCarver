@@ -41,9 +41,15 @@ public class SeamCarver {
 
     // relax the pixels
     private void relax(int x, int y) {
-        if (x == 0) {
+        if (x == 0 || y == 0 || x == pictureHeight - 1 || y == pictureWidth - 1) {
             distTo[x][y] = energy[x][y];
             edgeTo[x][y] = -1;
+        }
+        else if (y >= 1 || y < pictureWidth) {
+            if (distTo[x][y] > distTo[x - 1][y] + energy[x][y]) {
+                distTo[x][y] = distTo[x - 1][y] + energy[x][y];
+                edgeTo[x][y] = y;
+            }
         }
         else if (y > 0 && y < pictureWidth - 1) {
             if (distTo[x][y] > distTo[x - 1][y - 1] + energy[x][y]) {
@@ -58,27 +64,6 @@ public class SeamCarver {
                 distTo[x][y] = distTo[x - 1][y + 1] + energy[x][y];
                 edgeTo[x][y] = y + 1;
             }
-        }
-        else if (y == 0) {
-            if (distTo[x][y] > distTo[x - 1][y] + energy[x][y]) {
-                distTo[x][y] = distTo[x - 1][y] + energy[x][y];
-                edgeTo[x][y] = y;
-            }
-            if (distTo[x][y] > distTo[x - 1][y + 1] + energy[x][y]) {
-                distTo[x][y] = distTo[x - 1][y + 1] + energy[x][y];
-                edgeTo[x][y] = y + 1;
-            }
-        }
-        else if (y == pictureWidth - 1) {
-            if (distTo[x][y] > distTo[x - 1][y - 1] + energy[x][y]) {
-                distTo[x][y] = distTo[x - 1][y - 1] + energy[x][y];
-                edgeTo[x][y] = y - 1;
-            }
-            if (distTo[x][y] > distTo[x - 1][y] + energy[x][y]) {
-                distTo[x][y] = distTo[x - 1][y] + energy[x][y];
-                edgeTo[x][y] = y;
-            }
-
         }
     }
 
@@ -136,14 +121,15 @@ public class SeamCarver {
                 Math.abs(topGreen - bottomGreen), 2) + Math.pow(Math.abs(topBlue - bottomBlue), 2);
         return result;
     }
-
+    // todo - I have to recalculate the distances for HorizontalSeam i.e. or use a flag that says which direction distTo is setup for or
+    // have a separate grid for each direction
     // sequence of indices for horizontal seam
     public int[] findHorizontalSeam() {
         double minDistance = Double.MAX_VALUE;
         int minIndex = 0;
-        for (int i = 0; i < pictureHeight; i++) {
-            if (minDistance > distTo[i][pictureWidth - 1]) {
-                minDistance = distTo[i][pictureWidth - 1];
+        for (int i = 1; i < pictureHeight - 1; i++) {
+            if (minDistance > distTo[i][pictureWidth - 2]) {
+                minDistance = distTo[i][pictureWidth - 2];
                 minIndex = i;
             }
         }
@@ -159,17 +145,20 @@ public class SeamCarver {
     public int[] findVerticalSeam() {
         double minDistance = Double.MAX_VALUE;
         int minIndex = 0;
-        for (int i = 0; i < pictureWidth; i++) {
-            if (minDistance > distTo[pictureHeight - 1][i]) {
-                minDistance = distTo[pictureHeight - 1][i];
+        for (int i = 1; i < pictureWidth - 1; i++) {
+            if (minDistance > distTo[pictureHeight - 2][i]) {
+                minDistance = distTo[pictureHeight - 2][i];
                 minIndex = i;
             }
         }
         int rowCounter = pictureHeight - 1;
-        while (minIndex != -1) {
+        verticalSeam[rowCounter--] = minIndex - 1;
+        do {
             verticalSeam[rowCounter] = minIndex;
             minIndex = edgeTo[rowCounter--][minIndex];
-        }
+
+        } while (rowCounter > 0);
+        verticalSeam[rowCounter] = minIndex - 1;
         return verticalSeam;
     }
 
@@ -226,6 +215,7 @@ public class SeamCarver {
         for (int i : seamCarver.findVerticalSeam()) {
             System.out.printf("%d ", i);
         }
+        System.out.println("\n Here is the horizontal seam:");
         for (int i : seamCarver.findHorizontalSeam()) {
             System.out.printf("%d ", i);
         }
