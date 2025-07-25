@@ -69,7 +69,11 @@ public class SeamCarver {
 
     // relax the pixels
     private void verticalRelax(int x, int y) {
-        if (y == 1) {
+        if (x==1) {
+            verticalDistanceTo[x][y] = energy[x][y]+1000;
+            verticalEdgeTo[x][y]=y-1;
+        }
+        else if (y == 1 && y==pictureWidth -2) {
             if (verticalDistanceTo[x][y] > verticalDistanceTo[x - 1][y] + energy[x][y]) {
                 verticalDistanceTo[x][y] = verticalDistanceTo[x - 1][y] + energy[x][y];
                 verticalEdgeTo[x][y] = y;
@@ -255,11 +259,15 @@ public class SeamCarver {
             System.out.printf("%d ", i);
         }
         System.out.println();
+
         seamCarver = new SeamCarver(new Picture("3x7.png"));
         System.out.println("Here is the vertical seam for 3x7 file:");
         for (int i : seamCarver.findVerticalSeam()) {
             System.out.printf("%d ", i);
         }
+        System.out.println();
+        System.out.println("Here is the distance table for 4x6 file:");
+        seamCarver.printMyTwoDimensionalArray(seamCarver.verticalDistanceTo);
         System.out.println();
         // Vertical seam: { 1 2 1 1 2 1 }
         // 1000.00  1000.00* 1000.00  1000.00
@@ -271,11 +279,12 @@ public class SeamCarver {
         // Total energy = 2706.370116
         seamCarver = new SeamCarver(new Picture("4x6.png"));
         // seamCarver.printMyTwoDimensionalArray(seamCarver.energy);
+
         System.out.println("Here is the vertical seam for 4x6 file:");
         for (int i : seamCarver.findVerticalSeam()) {
             System.out.printf("%d ", i);
         }
-        System.out.println();
+
         System.out.println("\n Here is the horizontal seam:");
         for (int i : seamCarver.findHorizontalSeam()) {
             System.out.printf("%d ", i);
