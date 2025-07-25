@@ -43,30 +43,33 @@ public class SeamCarver {
     }
 
     private void horizontalRelax(int x, int y) {
-
-    }
-
-    // relax the pixels
-    private void verticalRelax(int x, int y) {
         if (x == 0 || y == 0 || x == pictureHeight - 1 || y == pictureWidth - 1) {
             verticalDistanceTo[x][y] = energy[x][y];
             horizontalDistanceTo[x][y] = energy[x][y];
             edgeTo[x][y] = -1;
             horizontalEdgeTo[x][y] = -1;
         }
+        if (horizontalDistanceTo[x][y] > horizontalDistanceTo[x - 1][y - 1] + energy[x][y]) {
+            horizontalDistanceTo[x][y] = horizontalDistanceTo[x - 1][y - 1] + energy[x][y];
+        }
+        if (horizontalDistanceTo[x][y] > horizontalDistanceTo[x][y - 1] + energy[x][y]) {
+            horizontalDistanceTo[x][y] = horizontalDistanceTo[x][y - 1] + energy[x][y];
+        }
+        if (horizontalDistanceTo[x][y] > horizontalDistanceTo[x + 1][y - 1] + energy[x][y]) {
+            horizontalDistanceTo[x][y] = horizontalDistanceTo[x + 1][y - 1] + energy[x][y];
+        }
+    }
+
+    // relax the pixels
+    private void verticalRelax(int x, int y) {
+        if (x == 0 || y == 0 || x == pictureHeight - 1 || y == pictureWidth - 1) {
+            verticalDistanceTo[x][y] = energy[x][y];
+            edgeTo[x][y] = -1;
+        }
         else if (y >= 1 || y < pictureWidth) {
             if (verticalDistanceTo[x][y] > verticalDistanceTo[x - 1][y] + energy[x][y]) {
                 verticalDistanceTo[x][y] = verticalDistanceTo[x - 1][y] + energy[x][y];
                 edgeTo[x][y] = y;
-            }
-            if (horizontalDistanceTo[x][y] > horizontalDistanceTo[x - 1][y - 1] + energy[x][y]) {
-                horizontalDistanceTo[x][y] = horizontalDistanceTo[x - 1][y - 1] + energy[x][y];
-            }
-            if (horizontalDistanceTo[x][y] > horizontalDistanceTo[x][y - 1] + energy[x][y]) {
-                horizontalDistanceTo[x][y] = horizontalDistanceTo[x][y - 1] + energy[x][y];
-            }
-            if (horizontalDistanceTo[x][y] > horizontalDistanceTo[x + 1][y - 1] + energy[x][y]) {
-                horizontalDistanceTo[x][y] = horizontalDistanceTo[x + 1][y - 1] + energy[x][y];
             }
         }
         else if (y > 0 && y < pictureWidth - 1) {
