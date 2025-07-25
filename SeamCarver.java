@@ -33,24 +33,41 @@ public class SeamCarver {
             for (int j = 0; j < pictureWidth; j++) {
                 energy[i][j] = energy(j, i);
                 distTo[i][j] = Double.POSITIVE_INFINITY;
+                relax(i, j);
             }
         }
         printMyTwoDimensionalArray(distTo);
     }
 
     // relax the pixels
-    // todo - Need to update distTo for all the cells, so relax() needs modifying to stay in the matrix
     private void relax(int x, int y) {
-        if (distTo[x][y] > energy[x - 1][y - 1] + energy[x][y])
-            distTo[x][y] = energy[x - 1][y - 1] + energy[x][y];
-        else if (distTo[x][y] > energy[x - 1][y] + energy[x][y])
-            distTo[x][y] = energy[x - 1][y] + energy[x][y];
-        else if (distTo[x][x] > energy[x - 1][y + 1] + energy[x][y])
-            distTo[x][y] = energy[x - 1][y + 1] + energy[x][y];
+        if (x == 0) {
+            distTo[x][y] = energy[x][y];
+        }
+        else if (y > 0 && y < pictureWidth - 1) {
+            if (distTo[x][y] > distTo[x - 1][y - 1] + energy[x][y])
+                distTo[x][y] = distTo[x - 1][y - 1] + energy[x][y];
+            else if (distTo[x][y] > distTo[x - 1][y] + energy[x][y])
+                distTo[x][y] = distTo[x - 1][y] + energy[x][y];
+            else if (distTo[x][x] > distTo[x - 1][y + 1] + energy[x][y])
+                distTo[x][y] = distTo[x - 1][y + 1] + energy[x][y];
+        }
+        else if (y == 0) {
+            if (distTo[x][y] > energy[x - 1][y] + energy[x][y])
+                distTo[x][y] = energy[x - 1][y] + energy[x][y];
+            else if (distTo[x][x] > energy[x - 1][y + 1] + energy[x][y])
+                distTo[x][y] = energy[x - 1][y + 1] + energy[x][y];
+        }
+        else if (y == pictureWidth - 1) {
+            if (distTo[x][y] > distTo[x - 1][y - 1] + energy[x][y])
+                distTo[x][y] = distTo[x - 1][y - 1] + energy[x][y];
+            else if (distTo[x][y] > distTo[x - 1][y] + energy[x][y])
+                distTo[x][y] = distTo[x - 1][y] + energy[x][y];
+        }
     }
 
 
-    // current picture
+    // current picture{
     public Picture picture() {
         return picture;
     }
