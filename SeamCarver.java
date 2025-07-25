@@ -43,26 +43,42 @@ public class SeamCarver {
     private void relax(int x, int y) {
         if (x == 0) {
             distTo[x][y] = energy[x][y];
+            edgeTo[x][y] = -1;
         }
         else if (y > 0 && y < pictureWidth - 1) {
-            if (distTo[x][y] > distTo[x - 1][y - 1] + energy[x][y])
+            if (distTo[x][y] > distTo[x - 1][y - 1] + energy[x][y]) {
                 distTo[x][y] = distTo[x - 1][y - 1] + energy[x][y];
-            else if (distTo[x][y] > distTo[x - 1][y] + energy[x][y])
+                edgeTo[x][y] = y - 1;
+            }
+            if (distTo[x][y] > distTo[x - 1][y] + energy[x][y]) {
                 distTo[x][y] = distTo[x - 1][y] + energy[x][y];
-            else if (distTo[x][x] > distTo[x - 1][y + 1] + energy[x][y])
+                edgeTo[x][y] = y;
+            }
+            if (distTo[x][y] > distTo[x - 1][y + 1] + energy[x][y]) {
                 distTo[x][y] = distTo[x - 1][y + 1] + energy[x][y];
+                edgeTo[x][y] = y + 1;
+            }
         }
         else if (y == 0) {
-            if (distTo[x][y] > energy[x - 1][y] + energy[x][y])
-                distTo[x][y] = energy[x - 1][y] + energy[x][y];
-            else if (distTo[x][x] > energy[x - 1][y + 1] + energy[x][y])
-                distTo[x][y] = energy[x - 1][y + 1] + energy[x][y];
+            if (distTo[x][y] > distTo[x - 1][y] + energy[x][y]) {
+                distTo[x][y] = distTo[x - 1][y] + energy[x][y];
+                edgeTo[x][y] = y;
+            }
+            if (distTo[x][y] > distTo[x - 1][y + 1] + energy[x][y]) {
+                distTo[x][y] = distTo[x - 1][y + 1] + energy[x][y];
+                edgeTo[x][y] = y + 1;
+            }
         }
         else if (y == pictureWidth - 1) {
-            if (distTo[x][y] > distTo[x - 1][y - 1] + energy[x][y])
+            if (distTo[x][y] > distTo[x - 1][y - 1] + energy[x][y]) {
                 distTo[x][y] = distTo[x - 1][y - 1] + energy[x][y];
-            else if (distTo[x][y] > distTo[x - 1][y] + energy[x][y])
+                edgeTo[x][y] = y - 1;
+            }
+            if (distTo[x][y] > distTo[x - 1][y] + energy[x][y]) {
                 distTo[x][y] = distTo[x - 1][y] + energy[x][y];
+                edgeTo[x][y] = y;
+            }
+
         }
     }
 
@@ -123,59 +139,6 @@ public class SeamCarver {
 
     // sequence of indices for horizontal seam
     public int[] findHorizontalSeam() {
-        double topParentDistance, middleParentDistance, bottomParentDistance;
-        this.picture = new Picture(picture);
-        for (int i = 0; i < pictureHeight; i++) {
-            for (int j = 0; j < pictureWidth; j++) {
-                energy[i][j] = energy(j, i);
-                if (j == 0) {
-                    distTo[i][j] = energy[i][j];
-                    edgeTo[i][j] = -1;
-                }
-                else if (i == 0) {
-                    middleParentDistance = distTo[i][j - 1];
-                    bottomParentDistance = distTo[i + 1][j - 1];
-                    if (middleParentDistance > bottomParentDistance) {
-                        distTo[i][j] = bottomParentDistance + energy[i][j];
-                        edgeTo[i][j] = j - 1;
-                    }
-                    else {
-                        distTo[i][j] = middleParentDistance + energy[i][j];
-                        edgeTo[i][j] = j - 1;
-                    }
-                }
-                else if (i == pictureHeight - 1) {
-                    topParentDistance = distTo[i - 1][j - 1];
-                    middleParentDistance = distTo[i][j - 1];
-                    if (topParentDistance > middleParentDistance) {
-                        distTo[i][j] = middleParentDistance + energy[i][j];
-                        edgeTo[i][j] = i;
-                    }
-                    else {
-                        distTo[i][j] = topParentDistance + energy[i][j];
-                        edgeTo[i][j] = i - 1;
-                    }
-                }
-                else {
-                    topParentDistance = distTo[i - 1][j - 1];
-                    middleParentDistance = distTo[i][j - 1];
-                    bottomParentDistance = distTo[i + 1][j - 1];
-                    if (topParentDistance > middleParentDistance
-                            || topParentDistance > bottomParentDistance) {
-                        if (middleParentDistance > bottomParentDistance) {
-                            distTo[i][j] = bottomParentDistance + energy[i][j];
-                            edgeTo[i][j] = i + 1;
-                        }
-                        distTo[i][j] = middleParentDistance + energy[i][j];
-                        edgeTo[i][j] = i;
-                    }
-                    else {
-                        distTo[i][j] = topParentDistance + energy[i][j];
-                        edgeTo[i][j] = i - 1;
-                    }
-                }
-            }
-        }
         double minDistance = Double.MAX_VALUE;
         int minIndex = 0;
         for (int i = 0; i < pictureHeight; i++) {
@@ -194,57 +157,6 @@ public class SeamCarver {
 
     // sequence of indices for vertical seam
     public int[] findVerticalSeam() {
-        double leftParentDistance, middleParentDistance, rightParentDistance;
-        for (int i = 0; i < pictureHeight; i++) {
-            for (int j = 0; j < pictureWidth; j++) {
-                if (i == 0) {
-                    distTo[i][j] = energy[i][j];
-                    edgeTo[i][j] = -1;
-                }
-                else if (j == 0) {
-                    middleParentDistance = distTo[i - 1][j];
-                    rightParentDistance = distTo[i - 1][j + 1];
-                    if (middleParentDistance > rightParentDistance) {
-                        distTo[i][j] = rightParentDistance + energy[i][j];
-                        edgeTo[i][j] = j + 1;
-                    }
-                    else {
-                        distTo[i][j] = middleParentDistance + energy[i][j];
-                        edgeTo[i][j] = j;
-                    }
-                }
-                else if (j == pictureWidth - 1) {
-                    leftParentDistance = distTo[i - 1][j - 1];
-                    middleParentDistance = distTo[i - 1][j];
-                    if (leftParentDistance > middleParentDistance) {
-                        distTo[i][j] = middleParentDistance + energy[i][j];
-                        edgeTo[i][j] = j;
-                    }
-                    else {
-                        distTo[i][j] = leftParentDistance + energy[i][j];
-                        edgeTo[i][j] = j - 1;
-                    }
-                }
-                else {
-                    leftParentDistance = distTo[i - 1][j - 1];
-                    middleParentDistance = distTo[i - 1][j];
-                    rightParentDistance = distTo[i - 1][j + 1];
-                    if (leftParentDistance > middleParentDistance
-                            || leftParentDistance > rightParentDistance) {
-                        if (middleParentDistance > rightParentDistance) {
-                            distTo[i][j] = rightParentDistance + energy[i][j];
-                            edgeTo[i][j] = j + 1;
-                        }
-                        distTo[i][j] = middleParentDistance + energy[i][j];
-                        edgeTo[i][j] = j;
-                    }
-                    else {
-                        distTo[i][j] = leftParentDistance + energy[i][j];
-                        edgeTo[i][j] = j - 1;
-                    }
-                }
-            }
-        }
         double minDistance = Double.MAX_VALUE;
         int minIndex = 0;
         for (int i = 0; i < pictureWidth; i++) {
