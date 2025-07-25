@@ -33,13 +33,13 @@ public class SeamCarver {
             for (int j = 0; j < pictureWidth; j++) {
                 energy[i][j] = energy(j, i);
                 distTo[i][j] = Double.POSITIVE_INFINITY;
-                if (i > 0 && i < pictureHeight - 1 && j > 0 && j < pictureWidth - 1) relax(i, j);
             }
         }
         printMyTwoDimensionalArray(distTo);
     }
 
     // relax the pixels
+    // todo - Need to update distTo for all the cells, so relax() needs modifying to stay in the matrix
     private void relax(int x, int y) {
         if (distTo[x][y] > energy[x - 1][y - 1] + energy[x][y])
             distTo[x][y] = energy[x - 1][y - 1] + energy[x][y];
