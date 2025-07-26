@@ -49,4 +49,67 @@ public class SeamCarverTest {
         int[] expectedSeam = { 1, 2, 1, 1, 2, 1 };
         Assert.assertArrayEquals(expectedSeam, actualSeam);
     }
+
+    @Test
+    public void testFindVerticalSeam5x6() {
+        picture = new Picture("5x6.png");
+        SeamCarver sc = new SeamCarver(picture);
+        int[] actualSeam = sc.findVerticalSeam();
+        int[] expectedSeam = { 1, 2, 2, 3, 2, 1 };
+        Assert.assertArrayEquals(expectedSeam, actualSeam);
+    }
+
+    @Test
+    public void testFindVerticalSeam6x5() {
+        picture = new Picture("6x5.png");
+        SeamCarver sc = new SeamCarver(picture);
+        int[] actualSeam = sc.findVerticalSeam();
+        int[] expectedSeam = { 3, 4, 3, 2, 1 };
+        Assert.assertArrayEquals(expectedSeam, actualSeam);
+    }
+
+    @Test
+    public void testFindVerticalSeam7x3() {
+        picture = new Picture("7x3.png");
+        SeamCarver sc = new SeamCarver(picture);
+        int[] actualSeam = sc.findVerticalSeam();
+        int[] expectedSeam = { 2, 3, 2 };
+        Assert.assertArrayEquals(expectedSeam, actualSeam);
+    }
+
+    @Test
+    public void testFindVerticalSeam7x10() {
+        picture = new Picture("7x10.png");
+        SeamCarver sc = new SeamCarver(picture);
+        int[] actualSeam = sc.findVerticalSeam();
+        int[] expectedSeam = { 2, 3, 4, 3, 4, 3, 3, 2, 2, 1 };
+        Assert.assertArrayEquals(expectedSeam, actualSeam);
+    }
+
+    @Test
+    public void testFindVerticalSeam10x10() {
+        picture = new Picture("10x10.png");
+        SeamCarver sc = new SeamCarver(picture);
+        int[] actualSeam = sc.findVerticalSeam();
+        int[] expectedSeam = { 6, 7, 7, 7, 7, 7, 8, 8, 7, 6 };
+        Assert.assertArrayEquals(expectedSeam, actualSeam);
+    }
+
+    @Test
+    public void testFindVerticalSeam10x12() {
+        picture = new Picture("10x12.png");
+        SeamCarver sc = new SeamCarver(picture);
+        int[] actualSeam = sc.findVerticalSeam();
+        int[] expectedSeam = { 5, 6, 7, 8, 7, 7, 6, 7, 6, 5, 6, 5 };
+        Assert.assertArrayEquals(expectedSeam, actualSeam);
+    }
+
+    @Test
+    public void testFindVerticalSeam12x10() {
+        picture = new Picture("12x10.png");
+        SeamCarver sc = new SeamCarver(picture);
+        int[] actualSeam = sc.findVerticalSeam();
+        int[] expectedSeam = { 6, 7, 7, 6, 6, 7, 7, 7, 8, 7 };
+        Assert.assertArrayEquals(expectedSeam, actualSeam);
+    }
 }
