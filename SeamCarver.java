@@ -102,7 +102,7 @@ public class SeamCarver {
             for (int i = 1; i < pictureHeight - 1; i++) {
                 if (j == 1) {
                     distTo[i][j] = energy[i][j];
-                    edgeTo[i][j] = -i;
+                    edgeTo[i][j] = i - 1;
                 }
                 else if (pictureHeight == 3) {
                     // case 1 - only one roow
@@ -163,9 +163,10 @@ public class SeamCarver {
             }
         }
         int columnCounter = pictureWidth - 1;
-        while (minIndex != -1) {
-            minIndex = edgeTo[columnCounter--][minIndex];
+        horizontalSeam[columnCounter--] = minIndex - 1;
+        while (columnCounter >= 0) {
             horizontalSeam[columnCounter] = minIndex;
+            minIndex = edgeTo[columnCounter--][minIndex];
         }
         return horizontalSeam;
     }
