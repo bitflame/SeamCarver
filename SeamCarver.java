@@ -283,7 +283,7 @@ public class SeamCarver {
                 minIndex = verticalEdgeTo[rowCounter--][minIndex];
 
             } while (rowCounter > 0);
-            verticalSeam[rowCounter] = minIndex - 1;
+            // verticalSeam[rowCounter] = minIndex - 1;
             return verticalSeam;
         }
 
