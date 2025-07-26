@@ -82,11 +82,11 @@ public class SeamCarverTest {
         picture = new Picture("7x10.png");
         SeamCarver sc = new SeamCarver(picture);
         int[] actualSeam = sc.findVerticalSeam();
-        System.out.println("Here is the distance table for 10x12 file:");
-        for(int i: sc.findVerticalSeam()) {
-            System.out.printf("%4d", i);
-        }
-        System.out.println();
+        // System.out.println("Here is the distance table for 7x10 file:");
+        // for (int i : sc.findVerticalSeam()) {
+        //     System.out.printf("%4d", i);
+        // }
+        // System.out.println();
         int[] expectedSeam = { 2, 3, 4, 3, 4, 3, 3, 2, 2, 1 };
         Assert.assertArrayEquals(expectedSeam, actualSeam);
     }

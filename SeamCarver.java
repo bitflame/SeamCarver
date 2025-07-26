@@ -19,8 +19,6 @@ public class SeamCarver {
     private int[] verticalSeam;
     private int[] horizontalSeam;
     private int pictureHeight, pictureWidth;
-    private boolean vertical = false;
-    private boolean horizontal = false;
 
     // create a seam carver object based on the given picture
     public SeamCarver(Picture picture) {
@@ -49,127 +47,6 @@ public class SeamCarver {
             }
         }
     }
-
-    private void horizontalRelax(int x, int y) {
-        if (x == 0 || y == 0 || x == pictureHeight - 1 || y == pictureWidth - 1) {
-            verticalDistanceTo[x][y] = energy[x][y];
-            horizontalDistanceTo[x][y] = energy[x][y];
-            verticalEdgeTo[x][y] = -1;
-            horizontalEdgeTo[x][y] = -1;
-        }
-        if (horizontalDistanceTo[x][y] > horizontalDistanceTo[x - 1][y - 1] + energy[x][y]) {
-            horizontalDistanceTo[x][y] = horizontalDistanceTo[x - 1][y - 1] + energy[x][y];
-        }
-        if (horizontalDistanceTo[x][y] > horizontalDistanceTo[x][y - 1] + energy[x][y]) {
-            horizontalDistanceTo[x][y] = horizontalDistanceTo[x][y - 1] + energy[x][y];
-        }
-        if (horizontalDistanceTo[x][y] > horizontalDistanceTo[x + 1][y - 1] + energy[x][y]) {
-            horizontalDistanceTo[x][y] = horizontalDistanceTo[x + 1][y - 1] + energy[x][y];
-        }
-    }
-
-    private void relaxTwo() {
-        double leftSum, middleSum, rightSum;
-        for (int i = 1; i < pictureHeight - 1; i++) {
-            for (int j = 1; j < pictureWidth - 1; j++) {
-                if (i == 1) {
-                    verticalDistanceTo[i][j] = energy[i][j];
-                    verticalEdgeTo[i][j] = j - 1;
-                }
-                // Case 1 - only 1 column
-                else if (pictureWidth == 3) {
-                    verticalDistanceTo[i][j] = energy[i][j] + verticalDistanceTo[i - 1][j];
-                    verticalEdgeTo[i][j] = j;
-                }
-                else if (pictureWidth > 3 && j == 1) {
-                    // Case 2 - The first
-                    rightSum = energy[i][j] + verticalDistanceTo[i - 1][j + 1];
-                    middleSum = energy[i][j] + verticalDistanceTo[i - 1][j];
-                    if (rightSum <= middleSum) {
-                        verticalDistanceTo[i][j] = energy[i][j] + verticalDistanceTo[i - 1][j + 1];
-                        verticalEdgeTo[i][j] = j + 1;
-                    }
-                    else {
-                        verticalDistanceTo[i][j] = energy[i][j] + verticalDistanceTo[i - 1][j];
-                        verticalEdgeTo[i][j] = j;
-                    }
-                }
-                else if (pictureWidth > 3 && j == pictureWidth - 2) {
-                    // Case 3 - the last column
-                    middleSum = energy[i][j] + verticalDistanceTo[i - 1][j];
-                    leftSum = energy[i][j] + verticalDistanceTo[i - 1][j - 1];
-                    if (middleSum <= leftSum) {
-                        verticalDistanceTo[i][j] = middleSum;
-                        verticalEdgeTo[i][j] = j;
-                    }
-                    else {
-                        verticalDistanceTo[i][j] = leftSum;
-                        verticalEdgeTo[i][j] = j - 1;
-                    }
-                }
-                else {
-                    // Every other situation
-                    leftSum = energy[i][j] + verticalDistanceTo[i - 1][j - 1];
-                    middleSum = energy[i][j] + verticalDistanceTo[i - 1][j];
-                    rightSum = energy[i][j] + verticalDistanceTo[i - 1][j + 1];
-                    if (leftSum <= middleSum && leftSum <= rightSum) {
-                        verticalDistanceTo[i][j] = leftSum;
-                        verticalEdgeTo[i][j] = j - 1;
-                    }
-                    else if (middleSum <= leftSum && middleSum <= rightSum) {
-                        verticalDistanceTo[i][j] = middleSum;
-                        verticalEdgeTo[i][j] = j;
-                    }
-                    else if (rightSum <= leftSum && rightSum <= middleSum) {
-                        verticalDistanceTo[i][j] = rightSum;
-                        verticalEdgeTo[i][j] = j + 1;
-                    }
-                }
-
-            }
-        }
-    }
-
-    // relax the pixels
-    private void verticalRelax(int x, int y) {
-        if (x == 1) {
-            verticalDistanceTo[x][y] = energy[x][y] + 1000;
-            verticalEdgeTo[x][y] = y - 1;
-        }
-        else if (y == 1 && y == pictureWidth - 2) {
-            if (verticalDistanceTo[x][y] > verticalDistanceTo[x - 1][y] + energy[x][y]) {
-                verticalDistanceTo[x][y] = verticalDistanceTo[x - 1][y] + energy[x][y];
-                verticalEdgeTo[x][y] = y;
-            }
-        }
-        else if (y == pictureWidth - 2) {
-            if (verticalDistanceTo[x][y] > verticalDistanceTo[x - 1][y - 1] + energy[x][y]) {
-                verticalDistanceTo[x][y] = verticalDistanceTo[x - 1][y - 1] + energy[x][y];
-                verticalEdgeTo[x][y] = y - 1;
-            }
-            if (verticalDistanceTo[x][y] > verticalDistanceTo[x - 1][y] + energy[x][y]) {
-                verticalDistanceTo[x][y] = verticalDistanceTo[x - 1][y] + energy[x][y];
-                verticalEdgeTo[x][y] = y;
-            }
-        }
-        else {
-            // todo -- you need to compare the sum of cell's energy + any of the possible parents and then
-            // update the distance table
-            if (verticalDistanceTo[x][y] > verticalDistanceTo[x - 1][y - 1] + energy[x][y]) {
-                verticalDistanceTo[x][y] = verticalDistanceTo[x - 1][y - 1] + energy[x][y];
-                verticalEdgeTo[x][y] = y - 1;
-            }
-            if (verticalDistanceTo[x][y] > verticalDistanceTo[x - 1][y] + energy[x][y]) {
-                verticalDistanceTo[x][y] = verticalDistanceTo[x - 1][y] + energy[x][y];
-                verticalEdgeTo[x][y] = y;
-            }
-            if (verticalDistanceTo[x][y] > verticalDistanceTo[x - 1][y + 1] + energy[x][y]) {
-                verticalDistanceTo[x][y] = verticalDistanceTo[x - 1][y + 1] + energy[x][y];
-                verticalEdgeTo[x][y] = y + 1;
-            }
-        }
-    }
-
 
     // current picture{
     public Picture picture() {
@@ -246,48 +123,82 @@ public class SeamCarver {
 
     // sequence of indices for vertical seam
     public int[] findVerticalSeam() {
-        if (vertical == true) {
-            double minDistance = Double.MAX_VALUE;
-            int minIndex = 0;
-            for (int i = 1; i < pictureWidth - 1; i++) {
-                if (minDistance > verticalDistanceTo[pictureHeight - 2][i]) {
-                    minDistance = verticalDistanceTo[pictureHeight - 2][i];
-                    minIndex = i;
+        double leftSum, middleSum, rightSum;
+        for (int i = 1; i < pictureHeight - 1; i++) {
+            for (int j = 1; j < pictureWidth - 1; j++) {
+                if (i == 1) {
+                    verticalDistanceTo[i][j] = energy[i][j];
+                    verticalEdgeTo[i][j] = j - 1;
                 }
-            }
-            int rowCounter = pictureHeight - 1;
-            verticalSeam[rowCounter--] = minIndex - 1;
-            do {
-                verticalSeam[rowCounter] = minIndex;
-                minIndex = verticalEdgeTo[rowCounter--][minIndex];
+                // Case 1 - only 1 column
+                else if (pictureWidth == 3) {
+                    verticalDistanceTo[i][j] = energy[i][j] + verticalDistanceTo[i - 1][j];
+                    verticalEdgeTo[i][j] = j;
+                }
+                else if (pictureWidth > 3 && j == 1) {
+                    // Case 2 - The first
+                    rightSum = energy[i][j] + verticalDistanceTo[i - 1][j + 1];
+                    middleSum = energy[i][j] + verticalDistanceTo[i - 1][j];
+                    if (rightSum <= middleSum) {
+                        verticalDistanceTo[i][j] = energy[i][j] + verticalDistanceTo[i - 1][j + 1];
+                        verticalEdgeTo[i][j] = j + 1;
+                    }
+                    else {
+                        verticalDistanceTo[i][j] = energy[i][j] + verticalDistanceTo[i - 1][j];
+                        verticalEdgeTo[i][j] = j;
+                    }
+                }
+                else if (pictureWidth > 3 && j == pictureWidth - 2) {
+                    // Case 3 - the last column
+                    middleSum = energy[i][j] + verticalDistanceTo[i - 1][j];
+                    leftSum = energy[i][j] + verticalDistanceTo[i - 1][j - 1];
+                    if (middleSum <= leftSum) {
+                        verticalDistanceTo[i][j] = middleSum;
+                        verticalEdgeTo[i][j] = j;
+                    }
+                    else {
+                        verticalDistanceTo[i][j] = leftSum;
+                        verticalEdgeTo[i][j] = j - 1;
+                    }
+                }
+                else {
+                    // Every other situation
+                    leftSum = energy[i][j] + verticalDistanceTo[i - 1][j - 1];
+                    middleSum = energy[i][j] + verticalDistanceTo[i - 1][j];
+                    rightSum = energy[i][j] + verticalDistanceTo[i - 1][j + 1];
+                    if (leftSum <= middleSum && leftSum <= rightSum) {
+                        verticalDistanceTo[i][j] = leftSum;
+                        verticalEdgeTo[i][j] = j - 1;
+                    }
+                    else if (middleSum <= leftSum && middleSum <= rightSum) {
+                        verticalDistanceTo[i][j] = middleSum;
+                        verticalEdgeTo[i][j] = j;
+                    }
+                    else if (rightSum <= leftSum && rightSum <= middleSum) {
+                        verticalDistanceTo[i][j] = rightSum;
+                        verticalEdgeTo[i][j] = j + 1;
+                    }
+                }
 
-            } while (rowCounter > 0);
-            verticalSeam[rowCounter] = minIndex - 1;
-            return verticalSeam;
+            }
         }
-        else {
-            vertical = true;
-            relaxTwo();
-            double minDistance = Double.MAX_VALUE;
-            int minIndex = 0;
-            for (int i = 1; i < pictureWidth - 1; i++) {
-                if (minDistance > verticalDistanceTo[pictureHeight - 2][i]) {
-                    minDistance = verticalDistanceTo[pictureHeight - 2][i];
-                    minIndex = i;
-                }
+        double minDistance = Double.MAX_VALUE;
+        int minIndex = 0;
+        for (int i = 1; i < pictureWidth - 1; i++) {
+            if (minDistance > verticalDistanceTo[pictureHeight - 2][i]) {
+                minDistance = verticalDistanceTo[pictureHeight - 2][i];
+                minIndex = i;
             }
-            int rowCounter = pictureHeight - 1;
-            verticalSeam[rowCounter--] = minIndex - 1;
-            do {
-                verticalSeam[rowCounter] = minIndex;
-                minIndex = verticalEdgeTo[rowCounter--][minIndex];
-
-            } while (rowCounter > 0);
+        }
+        int rowCounter = pictureHeight - 1;
+        verticalSeam[rowCounter--] = minIndex - 1;
+        do {
             verticalSeam[rowCounter] = minIndex;
-            return verticalSeam;
-        }
+            minIndex = verticalEdgeTo[rowCounter--][minIndex];
 
-
+        } while (rowCounter > 0);
+        verticalSeam[rowCounter] = minIndex;
+        return verticalSeam;
     }
 
     private void printMyTwoDimensionalArray(double[][] matrix) {
@@ -318,28 +229,11 @@ public class SeamCarver {
 
     }
 
-    private class Pixel implements Comparable<Pixel> {
-        int x;
-        int y;
-        double energy;
-
-        Pixel(int x, int y, double energy) {
-            this.x = x;
-            this.y = y;
-            this.energy = energy;
-        }
-
-        public int compareTo(Pixel o) {
-            if (this.energy > o.energy) return 1;
-            if (this.energy < o.energy) return -1;
-            return 0;
-        }
-    }
-
     //  unit testing (optional)
     public static void main(String[] args) {
         SeamCarver seamCarver = new SeamCarver(new Picture("7x10.png"));
-        System.out.println("Here is the vertical seam for 7x10 file:");
+        System.out.println(
+                "Expecting  2 3 4 3 4 3 3 2 2 1. Here is the vertical seam for 7x10 file:");
         for (int i : seamCarver.findVerticalSeam()) {
             System.out.printf("%d ", i);
         }
