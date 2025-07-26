@@ -33,11 +33,28 @@ public class SeamCarverTest {
     }
 
     @Test
+    public void testFindHorizontalSeam3x4() {
+        SeamCarver sc = new SeamCarver(picture);
+        int[] actualSeam = sc.findHorizontalSeam();
+        int[] expectedSeam = { 1, 2, 1 };
+        Assert.assertArrayEquals(expectedSeam, actualSeam);
+    }
+
+    @Test
     public void testFindVerticalSeam3x7() {
         picture = new Picture("3x7.png");
         SeamCarver sc = new SeamCarver(picture);
         int[] actualSeam = sc.findVerticalSeam();
         int[] expectedSeam = { 0, 1, 1, 1, 1, 1, 0 };
+        Assert.assertArrayEquals(expectedSeam, actualSeam);
+    }
+
+    @Test
+    public void testFindHorizontalSeam3x7() {
+        picture = new Picture("3x7.png");
+        SeamCarver sc = new SeamCarver(picture);
+        int[] actualSeam = sc.findHorizontalSeam();
+        int[] expectedSeam = { 1, 2, 1 };
         Assert.assertArrayEquals(expectedSeam, actualSeam);
     }
 
@@ -51,11 +68,29 @@ public class SeamCarverTest {
     }
 
     @Test
+    public void testFindHorizontalSeam4x6() {
+        picture = new Picture("4x6.png");
+        SeamCarver sc = new SeamCarver(picture);
+        int[] actualSeam = sc.findHorizontalSeam();
+        int[] expectedSeam = { 1, 2, 1, 0 };
+        Assert.assertArrayEquals(expectedSeam, actualSeam);
+    }
+
+    @Test
     public void testFindVerticalSeam5x6() {
         picture = new Picture("5x6.png");
         SeamCarver sc = new SeamCarver(picture);
         int[] actualSeam = sc.findVerticalSeam();
         int[] expectedSeam = { 1, 2, 2, 3, 2, 1 };
+        Assert.assertArrayEquals(expectedSeam, actualSeam);
+    }
+
+    @Test
+    public void testFindHorizontalSeam5x6() {
+        picture = new Picture("5x6.png");
+        SeamCarver sc = new SeamCarver(picture);
+        int[] actualSeam = sc.findHorizontalSeam();
+        int[] expectedSeam = { 2, 3, 2, 3, 2 };
         Assert.assertArrayEquals(expectedSeam, actualSeam);
     }
 
@@ -69,11 +104,29 @@ public class SeamCarverTest {
     }
 
     @Test
+    public void testFindHorizontalSeam6x5() {
+        picture = new Picture("6x5.png");
+        SeamCarver sc = new SeamCarver(picture);
+        int[] actualSeam = sc.findHorizontalSeam();
+        int[] expectedSeam = { 1, 2, 1, 2, 1, 0 };
+        Assert.assertArrayEquals(expectedSeam, actualSeam);
+    }
+
+    @Test
     public void testFindVerticalSeam7x3() {
         picture = new Picture("7x3.png");
         SeamCarver sc = new SeamCarver(picture);
         int[] actualSeam = sc.findVerticalSeam();
         int[] expectedSeam = { 2, 3, 2 };
+        Assert.assertArrayEquals(expectedSeam, actualSeam);
+    }
+
+    @Test
+    public void testFindHorizontalSeam7x3() {
+        picture = new Picture("7x3.png");
+        SeamCarver sc = new SeamCarver(picture);
+        int[] actualSeam = sc.findHorizontalSeam();
+        int[] expectedSeam = { 0, 1, 1, 1, 1, 1, 0 };
         Assert.assertArrayEquals(expectedSeam, actualSeam);
     }
 
@@ -92,11 +145,29 @@ public class SeamCarverTest {
     }
 
     @Test
+    public void testFindHorizontalSeam7x10() {
+        picture = new Picture("7x10.png");
+        SeamCarver sc = new SeamCarver(picture);
+        int[] actualSeam = sc.findHorizontalSeam();
+        int[] expectedSeam = { 6, 7, 7, 7, 8, 8, 7 };
+        Assert.assertArrayEquals(expectedSeam, actualSeam);
+    }
+
+    @Test
     public void testFindVerticalSeam10x10() {
         picture = new Picture("10x10.png");
         SeamCarver sc = new SeamCarver(picture);
         int[] actualSeam = sc.findVerticalSeam();
         int[] expectedSeam = { 6, 7, 7, 7, 7, 7, 8, 8, 7, 6 };
+        Assert.assertArrayEquals(expectedSeam, actualSeam);
+    }
+
+    @Test
+    public void testFindHorizontalSeam10x10() {
+        picture = new Picture("10x10.png");
+        SeamCarver sc = new SeamCarver(picture);
+        int[] actualSeam = sc.findHorizontalSeam();
+        int[] expectedSeam = { 0, 1, 2, 3, 3, 3, 3, 2, 1, 0 };
         Assert.assertArrayEquals(expectedSeam, actualSeam);
     }
 
@@ -110,11 +181,29 @@ public class SeamCarverTest {
     }
 
     @Test
+    public void testFindHorizontalSeam10x12() {
+        picture = new Picture("10x12.png");
+        SeamCarver sc = new SeamCarver(picture);
+        int[] actualSeam = sc.findHorizontalSeam();
+        int[] expectedSeam = { 8, 9, 10, 10, 10, 9, 10, 10, 9, 8 };
+        Assert.assertArrayEquals(expectedSeam, actualSeam);
+    }
+
+    @Test
     public void testFindVerticalSeam12x10() {
         picture = new Picture("12x10.png");
         SeamCarver sc = new SeamCarver(picture);
         int[] actualSeam = sc.findVerticalSeam();
         int[] expectedSeam = { 6, 7, 7, 6, 6, 7, 7, 7, 8, 7 };
+        Assert.assertArrayEquals(expectedSeam, actualSeam);
+    }
+
+    @Test
+    public void testFindHorizontalSeam12x10() {
+        picture = new Picture("12x10.png");
+        SeamCarver sc = new SeamCarver(picture);
+        int[] actualSeam = sc.findHorizontalSeam();
+        int[] expectedSeam = { 7, 8, 7, 8, 7, 6, 5, 6, 6, 5, 4, 3 };
         Assert.assertArrayEquals(expectedSeam, actualSeam);
     }
 }
