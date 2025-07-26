@@ -83,11 +83,11 @@ public class SeamCarver {
                 }
                 else if (pictureWidth > 3 && j == 1) {
                     // Case 2 - The first
-                    leftSum = energy[i][j] + verticalDistanceTo[i - 1][j - 1];
+                    rightSum = energy[i][j] + verticalDistanceTo[i - 1][j + 1];
                     middleSum = energy[i][j] + verticalDistanceTo[i - 1][j];
-                    if (leftSum <= middleSum) {
-                        verticalDistanceTo[i][j] = energy[i][j] + verticalDistanceTo[i - 1][j - 1];
-                        verticalEdgeTo[i][j] = j - 1;
+                    if (rightSum < middleSum) {
+                        verticalDistanceTo[i][j] = energy[i][j] + verticalDistanceTo[i - 1][j + 1];
+                        verticalEdgeTo[i][j] = j + 1;
                     }
                     else {
                         verticalDistanceTo[i][j] = energy[i][j] + verticalDistanceTo[i - 1][j];
@@ -99,11 +99,11 @@ public class SeamCarver {
                     middleSum = energy[i][j] + verticalDistanceTo[i - 1][j];
                     rightSum = energy[i][j] + verticalDistanceTo[i - 1][j + 1];
                     if (middleSum <= rightSum) {
-                        verticalDistanceTo[i][j] = energy[i][j] + middleSum;
+                        verticalDistanceTo[i][j] = middleSum;
                         verticalEdgeTo[i][j] = j;
                     }
                     else {
-                        verticalDistanceTo[i][j] = energy[i][j] + rightSum;
+                        verticalDistanceTo[i][j] = rightSum;
                         verticalEdgeTo[i][j] = j + 1;
                     }
                 }
@@ -113,7 +113,7 @@ public class SeamCarver {
                     middleSum = energy[i][j] + verticalDistanceTo[i - 1][j];
                     rightSum = energy[i][j] + verticalDistanceTo[i - 1][j + 1];
                     if (leftSum <= middleSum && leftSum <= rightSum) {
-                        verticalDistanceTo[i][j] = middleSum;
+                        verticalDistanceTo[i][j] = leftSum;
                         verticalEdgeTo[i][j] = j - 1;
                     }
                     else if (middleSum <= leftSum && middleSum <= rightSum) {
@@ -283,7 +283,7 @@ public class SeamCarver {
                 minIndex = verticalEdgeTo[rowCounter--][minIndex];
 
             } while (rowCounter > 0);
-            // verticalSeam[rowCounter] = minIndex - 1;
+            verticalSeam[rowCounter] = minIndex;
             return verticalSeam;
         }
 
