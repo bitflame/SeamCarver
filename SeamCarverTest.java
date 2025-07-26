@@ -43,13 +43,10 @@ public class SeamCarverTest {
 
     @Test
     public void testFindVerticalSeam4x6() {
-        picture = new Picture("3x7.png");
+        picture = new Picture("4x6.png");
         SeamCarver sc = new SeamCarver(picture);
         int[] actualSeam = sc.findVerticalSeam();
         int[] expectedSeam = { 1, 2, 1, 1, 2, 1 };
-        for (int i = 0; i < actualSeam.length; i++) {
-            System.out.print(" " + actualSeam[i] + " ");
-        }
         Assert.assertArrayEquals(expectedSeam, actualSeam);
     }
 }
