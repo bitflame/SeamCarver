@@ -5,17 +5,14 @@
  **************************************************************************** */
 
 import edu.princeton.cs.algs4.Picture;
-import edu.princeton.cs.algs4.Stack;
 
 import java.awt.Color;
 
 public class SeamCarver {
     private Picture picture;
     private double[][] energy;
-    private int[][] verticalEdgeTo;
-    private double[][] verticalDistanceTo;
-    private double[][] horizontalDistanceTo;
-    private int[][] horizontalEdgeTo;
+    private int[][] edgeTo;
+    private double[][] distTo;
     private int[] verticalSeam;
     private int[] horizontalSeam;
     private int pictureHeight, pictureWidth;
@@ -26,10 +23,8 @@ public class SeamCarver {
         pictureHeight = picture.height();
         pictureWidth = picture.width();
         energy = new double[pictureHeight][pictureWidth];
-        verticalEdgeTo = new int[pictureHeight][pictureWidth];
-        horizontalEdgeTo = new int[pictureHeight][pictureWidth];
-        verticalDistanceTo = new double[pictureHeight][pictureWidth];
-        horizontalDistanceTo = new double[pictureHeight][pictureWidth];
+        edgeTo = new int[pictureHeight][pictureWidth];
+        distTo = new double[pictureHeight][pictureWidth];
         verticalSeam = new int[pictureHeight];
         horizontalSeam = new int[pictureWidth];
 
@@ -37,12 +32,10 @@ public class SeamCarver {
             for (int j = 0; j < pictureWidth; j++) {
                 energy[i][j] = energy(j, i);
                 if (i == 0 || i == pictureHeight - 1 || j == 0 || j == pictureWidth - 1) {
-                    verticalDistanceTo[i][j] = energy[i][j];
-                    horizontalDistanceTo[i][j] = energy[i][j];
+                    distTo[i][j] = energy[i][j];
                 }
                 else {
-                    verticalDistanceTo[i][j] = Double.POSITIVE_INFINITY;
-                    horizontalDistanceTo[i][j] = Double.POSITIVE_INFINITY;
+                    distTo[i][j] = Double.POSITIVE_INFINITY;
                 }
             }
         }
@@ -104,19 +97,75 @@ public class SeamCarver {
 
     // sequence of indices for horizontal seam
     public int[] findHorizontalSeam() {
-
+        double topSum, middleSum, bottomSum;
+        for (int j = 1; j < pictureWidth - 1; j++) {
+            for (int i = 1; i < pictureHeight - 1; i++) {
+                if (j == 1) {
+                    distTo[i][j] = energy[i][j];
+                    edgeTo[i][j] = -i;
+                }
+                else if (pictureHeight == 3) {
+                    // case 1 - only one roow
+                    distTo[i][j] = energy[i][j] + distTo[i][j - 1];
+                    edgeTo[i][j] = i;
+                }
+                else if (pictureHeight > 3 && i == 1) {
+                    // Case 2 - only middle and bottom parent/sum - The first row
+                    middleSum = energy[i][j] + distTo[i][j - 1];
+                    bottomSum = energy[i][j] + distTo[i + 1][j - 1];
+                    if (bottomSum < middleSum) {
+                        distTo[i][j] = bottomSum;
+                        edgeTo[i][j] = i + 1;
+                    }
+                    else {
+                        distTo[i][j] = middleSum;
+                        edgeTo[i][j] = i;
+                    }
+                }
+                else if (pictureHeight > 3 && i == pictureHeight - 2) {
+                    // Case 3 - I am on last row and only have middle and top sum/parent
+                    topSum = energy[i][j] + distTo[i - 1][j - 1];
+                    middleSum = energy[i][j] + distTo[i][j - 1];
+                    if (middleSum < topSum) {
+                        distTo[i][j] = middleSum;
+                        edgeTo[i][j] = i;
+                    }
+                    else {
+                        distTo[i][j] = topSum;
+                        edgeTo[i][j] = i - 1;
+                    }
+                }
+                else {
+                    topSum = energy[i][j] + distTo[i - 1][j - 1];
+                    middleSum = energy[i][j] + distTo[i][j - 1];
+                    bottomSum = energy[i][j] + distTo[i + 1][j - 1];
+                    if (bottomSum <= middleSum && bottomSum <= topSum) {
+                        distTo[i][j] = bottomSum;
+                        edgeTo[i][j] = i + 1;
+                    }
+                    else if (middleSum <= bottomSum && middleSum <= topSum) {
+                        distTo[i][j] = middleSum;
+                        edgeTo[i][j] = i;
+                    }
+                    else if (topSum <= middleSum && topSum <= bottomSum) {
+                        distTo[i][j] = topSum;
+                        edgeTo[i][j] = i - 1;
+                    }
+                }
+            }
+        }
         double minDistance = Double.MAX_VALUE;
         int minIndex = 0;
         for (int i = 1; i < pictureHeight - 1; i++) {
-            if (minDistance > verticalDistanceTo[i][pictureWidth - 2]) {
-                minDistance = verticalDistanceTo[i][pictureWidth - 2];
+            if (minDistance > distTo[i][pictureWidth - 2]) {
+                minDistance = distTo[i][pictureWidth - 2];
                 minIndex = i;
             }
         }
         int columnCounter = pictureWidth - 1;
         while (minIndex != -1) {
+            minIndex = edgeTo[columnCounter--][minIndex];
             horizontalSeam[columnCounter] = minIndex;
-            minIndex = verticalEdgeTo[columnCounter--][minIndex];
         }
         return horizontalSeam;
     }
@@ -127,56 +176,56 @@ public class SeamCarver {
         for (int i = 1; i < pictureHeight - 1; i++) {
             for (int j = 1; j < pictureWidth - 1; j++) {
                 if (i == 1) {
-                    verticalDistanceTo[i][j] = energy[i][j];
-                    verticalEdgeTo[i][j] = j - 1;
+                    distTo[i][j] = energy[i][j];
+                    edgeTo[i][j] = j - 1;
                 }
                 // Case 1 - only 1 column
                 else if (pictureWidth == 3) {
-                    verticalDistanceTo[i][j] = energy[i][j] + verticalDistanceTo[i - 1][j];
-                    verticalEdgeTo[i][j] = j;
+                    distTo[i][j] = energy[i][j] + distTo[i - 1][j];
+                    edgeTo[i][j] = j;
                 }
                 else if (pictureWidth > 3 && j == 1) {
                     // Case 2 - The first
-                    rightSum = energy[i][j] + verticalDistanceTo[i - 1][j + 1];
-                    middleSum = energy[i][j] + verticalDistanceTo[i - 1][j];
+                    rightSum = energy[i][j] + distTo[i - 1][j + 1];
+                    middleSum = energy[i][j] + distTo[i - 1][j];
                     if (rightSum <= middleSum) {
-                        verticalDistanceTo[i][j] = energy[i][j] + verticalDistanceTo[i - 1][j + 1];
-                        verticalEdgeTo[i][j] = j + 1;
+                        distTo[i][j] = energy[i][j] + distTo[i - 1][j + 1];
+                        edgeTo[i][j] = j + 1;
                     }
                     else {
-                        verticalDistanceTo[i][j] = energy[i][j] + verticalDistanceTo[i - 1][j];
-                        verticalEdgeTo[i][j] = j;
+                        distTo[i][j] = energy[i][j] + distTo[i - 1][j];
+                        edgeTo[i][j] = j;
                     }
                 }
                 else if (pictureWidth > 3 && j == pictureWidth - 2) {
                     // Case 3 - the last column
-                    middleSum = energy[i][j] + verticalDistanceTo[i - 1][j];
-                    leftSum = energy[i][j] + verticalDistanceTo[i - 1][j - 1];
+                    middleSum = energy[i][j] + distTo[i - 1][j];
+                    leftSum = energy[i][j] + distTo[i - 1][j - 1];
                     if (middleSum <= leftSum) {
-                        verticalDistanceTo[i][j] = middleSum;
-                        verticalEdgeTo[i][j] = j;
+                        distTo[i][j] = middleSum;
+                        edgeTo[i][j] = j;
                     }
                     else {
-                        verticalDistanceTo[i][j] = leftSum;
-                        verticalEdgeTo[i][j] = j - 1;
+                        distTo[i][j] = leftSum;
+                        edgeTo[i][j] = j - 1;
                     }
                 }
                 else {
                     // Every other situation
-                    leftSum = energy[i][j] + verticalDistanceTo[i - 1][j - 1];
-                    middleSum = energy[i][j] + verticalDistanceTo[i - 1][j];
-                    rightSum = energy[i][j] + verticalDistanceTo[i - 1][j + 1];
+                    leftSum = energy[i][j] + distTo[i - 1][j - 1];
+                    middleSum = energy[i][j] + distTo[i - 1][j];
+                    rightSum = energy[i][j] + distTo[i - 1][j + 1];
                     if (leftSum <= middleSum && leftSum <= rightSum) {
-                        verticalDistanceTo[i][j] = leftSum;
-                        verticalEdgeTo[i][j] = j - 1;
+                        distTo[i][j] = leftSum;
+                        edgeTo[i][j] = j - 1;
                     }
                     else if (middleSum <= leftSum && middleSum <= rightSum) {
-                        verticalDistanceTo[i][j] = middleSum;
-                        verticalEdgeTo[i][j] = j;
+                        distTo[i][j] = middleSum;
+                        edgeTo[i][j] = j;
                     }
                     else if (rightSum <= leftSum && rightSum <= middleSum) {
-                        verticalDistanceTo[i][j] = rightSum;
-                        verticalEdgeTo[i][j] = j + 1;
+                        distTo[i][j] = rightSum;
+                        edgeTo[i][j] = j + 1;
                     }
                 }
 
@@ -185,8 +234,8 @@ public class SeamCarver {
         double minDistance = Double.MAX_VALUE;
         int minIndex = 0;
         for (int i = 1; i < pictureWidth - 1; i++) {
-            if (minDistance > verticalDistanceTo[pictureHeight - 2][i]) {
-                minDistance = verticalDistanceTo[pictureHeight - 2][i];
+            if (minDistance > distTo[pictureHeight - 2][i]) {
+                minDistance = distTo[pictureHeight - 2][i];
                 minIndex = i;
             }
         }
@@ -194,7 +243,7 @@ public class SeamCarver {
         verticalSeam[rowCounter--] = minIndex - 1;
         do {
             verticalSeam[rowCounter] = minIndex;
-            minIndex = verticalEdgeTo[rowCounter--][minIndex];
+            minIndex = edgeTo[rowCounter--][minIndex];
 
         } while (rowCounter > 0);
         verticalSeam[rowCounter] = minIndex;
@@ -231,7 +280,12 @@ public class SeamCarver {
 
     //  unit testing (optional)
     public static void main(String[] args) {
-        SeamCarver seamCarver = new SeamCarver(new Picture("7x10.png"));
+        SeamCarver seamCarver = new SeamCarver(new Picture("3x4.png"));
+        System.out.println("\n Here is the horizontal seam:");
+        for (int i : seamCarver.findHorizontalSeam()) {
+            System.out.printf("%d ", i);
+        }
+        seamCarver = new SeamCarver(new Picture("7x10.png"));
         System.out.println(
                 "Expecting  2 3 4 3 4 3 3 2 2 1. Here is the vertical seam for 7x10 file:");
         for (int i : seamCarver.findVerticalSeam()) {
@@ -239,7 +293,7 @@ public class SeamCarver {
         }
         System.out.println();
         System.out.println("Here is the distance table for 7x10 file:");
-        seamCarver.printMyTwoDimensionalArray(seamCarver.verticalDistanceTo);
+        seamCarver.printMyTwoDimensionalArray(seamCarver.distTo);
         System.out.println();
         seamCarver = new SeamCarver(new Picture("3x4.png"));
         System.out.println("Here is the vertical seam for 3x4 file:");
@@ -248,7 +302,7 @@ public class SeamCarver {
         }
         System.out.println();
         System.out.println("Here is the distance table for 3x4 file:");
-        seamCarver.printMyTwoDimensionalArray(seamCarver.verticalDistanceTo);
+        seamCarver.printMyTwoDimensionalArray(seamCarver.distTo);
         System.out.println();
         seamCarver = new SeamCarver(new Picture("3x7.png"));
         System.out.println("Here is the vertical seam for 3x7 file:");
@@ -257,7 +311,7 @@ public class SeamCarver {
         }
         System.out.println();
         System.out.println("Here is the distance table for 3x7 file:");
-        seamCarver.printMyTwoDimensionalArray(seamCarver.verticalDistanceTo);
+        seamCarver.printMyTwoDimensionalArray(seamCarver.distTo);
         System.out.println();
         // Vertical seam: { 1 2 1 1 2 1 }
         // 1000.00  1000.00* 1000.00  1000.00
@@ -274,12 +328,7 @@ public class SeamCarver {
             System.out.printf("%d ", i);
         }
         System.out.println("Here is the distance table for 4x6 file:");
-        seamCarver.printMyTwoDimensionalArray(seamCarver.verticalDistanceTo);
+        seamCarver.printMyTwoDimensionalArray(seamCarver.distTo);
         System.out.println();
-
-        System.out.println("\n Here is the horizontal seam:");
-        for (int i : seamCarver.findHorizontalSeam()) {
-            System.out.printf("%d ", i);
-        }
     }
 }
