@@ -85,7 +85,7 @@ public class SeamCarver {
                     // Case 2 - The first
                     rightSum = energy[i][j] + verticalDistanceTo[i - 1][j + 1];
                     middleSum = energy[i][j] + verticalDistanceTo[i - 1][j];
-                    if (rightSum < middleSum) {
+                    if (rightSum <= middleSum) {
                         verticalDistanceTo[i][j] = energy[i][j] + verticalDistanceTo[i - 1][j + 1];
                         verticalEdgeTo[i][j] = j + 1;
                     }
@@ -94,17 +94,17 @@ public class SeamCarver {
                         verticalEdgeTo[i][j] = j;
                     }
                 }
-                else if (pictureWidth > 3 && j == pictureWidth - 1) {
+                else if (pictureWidth > 3 && j == pictureWidth - 2) {
                     // Case 3 - the last column
                     middleSum = energy[i][j] + verticalDistanceTo[i - 1][j];
-                    rightSum = energy[i][j] + verticalDistanceTo[i - 1][j + 1];
-                    if (middleSum <= rightSum) {
+                    leftSum = energy[i][j] + verticalDistanceTo[i - 1][j - 1];
+                    if (middleSum <= leftSum) {
                         verticalDistanceTo[i][j] = middleSum;
                         verticalEdgeTo[i][j] = j;
                     }
                     else {
-                        verticalDistanceTo[i][j] = rightSum;
-                        verticalEdgeTo[i][j] = j + 1;
+                        verticalDistanceTo[i][j] = leftSum;
+                        verticalEdgeTo[i][j] = j - 1;
                     }
                 }
                 else {
@@ -338,7 +338,16 @@ public class SeamCarver {
 
     //  unit testing (optional)
     public static void main(String[] args) {
-        SeamCarver seamCarver = new SeamCarver(new Picture("3x4.png"));
+        SeamCarver seamCarver = new SeamCarver(new Picture("7x10.png"));
+        System.out.println("Here is the vertical seam for 7x10 file:");
+        for (int i : seamCarver.findVerticalSeam()) {
+            System.out.printf("%d ", i);
+        }
+        System.out.println();
+        System.out.println("Here is the distance table for 7x10 file:");
+        seamCarver.printMyTwoDimensionalArray(seamCarver.verticalDistanceTo);
+        System.out.println();
+        seamCarver = new SeamCarver(new Picture("3x4.png"));
         System.out.println("Here is the vertical seam for 3x4 file:");
         for (int i : seamCarver.findVerticalSeam()) {
             System.out.printf("%d ", i);
