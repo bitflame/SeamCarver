@@ -166,7 +166,7 @@ public class SeamCarver {
         horizontalSeam[columnCounter--] = minIndex - 1;
         while (columnCounter >= 0) {
             horizontalSeam[columnCounter] = minIndex;
-            minIndex = edgeTo[columnCounter--][minIndex];
+            minIndex = edgeTo[minIndex][columnCounter--];
         }
         return horizontalSeam;
     }
