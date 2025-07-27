@@ -1,0 +1,3 @@
+The test file shows how to traverse a two dimensional array in a column major way. What
+worked for me was to switch the i, and j lines and leave everything else the same.
+Remember i still refers to the row and j refers to the column
