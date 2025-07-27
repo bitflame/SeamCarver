@@ -11,8 +11,8 @@ import java.awt.Color;
 public class SeamCarver {
     private Picture picture;
     private double[][] energy;
-    private int[][] edgeTo;
-    private double[][] distTo;
+    // private int[][] edgeTo;
+    // private double[][] distTo;
     private int[] verticalSeam;
     private int[] horizontalSeam;
     private int pictureHeight, pictureWidth;
@@ -25,20 +25,20 @@ public class SeamCarver {
         pictureHeight = picture.height();
         pictureWidth = picture.width();
         energy = new double[pictureHeight][pictureWidth];
-        edgeTo = new int[pictureHeight][pictureWidth];
-        distTo = new double[pictureHeight][pictureWidth];
+        // edgeTo = new int[pictureHeight][pictureWidth];
+        // distTo = new double[pictureHeight][pictureWidth];
         verticalSeam = new int[pictureHeight];
         horizontalSeam = new int[pictureWidth];
 
         for (int y = 0; y < pictureHeight; y++) {
             for (int x = 0; x < pictureWidth; x++) {
                 energy[y][x] = energy(x, y);
-                if (y == 0 || y == pictureHeight - 1 || x == 0 || x == pictureWidth - 1) {
-                    distTo[y][x] = energy[y][x];
-                }
-                else {
-                    distTo[y][x] = Double.POSITIVE_INFINITY;
-                }
+                // if (y == 0 || y == pictureHeight - 1 || x == 0 || x == pictureWidth - 1) {
+                //     distTo[y][x] = energy[y][x];
+                // }
+                // else {
+                //     distTo[y][x] = Double.POSITIVE_INFINITY;
+                // }
             }
         }
     }
@@ -112,30 +112,31 @@ public class SeamCarver {
         return result;
     }
 
-    private void resetdistToArray() {
-        for (int i = 0; i < pictureHeight; i++) {
-            for (int j = 0; j < pictureWidth; j++) {
-                if (i == 0 || i == pictureHeight - 1 || j == 0 || j == pictureWidth - 1) {
-                    distTo[i][j] = energy[i][j];
-                }
-                else {
-                    distTo[i][j] = Double.POSITIVE_INFINITY;
-                }
-            }
-        }
-    }
+    // private void resetdistToArray() {
+    //     for (int i = 0; i < pictureHeight; i++) {
+    //         for (int j = 0; j < pictureWidth; j++) {
+    //             if (i == 0 || i == pictureHeight - 1 || j == 0 || j == pictureWidth - 1) {
+    //                 distTo[i][j] = energy[i][j];
+    //             }
+    //             else {
+    //                 distTo[i][j] = Double.POSITIVE_INFINITY;
+    //             }
+    //         }
+    //     }
+    // }
 
     // sequence of indices for horizontal seam
     public int[] findHorizontalSeam() {
         // resetdistToArray();
-        // edgeTo = new int[pictureHeight][pictureWidth];
+        int[][] edgeTo = new int[pictureHeight][pictureWidth];
+        double[][] distTo = new double[pictureHeight][pictureWidth];
         double topSum, middleSum, bottomSum;
         for (int j = 1; j < pictureWidth - 1; j++) {
             for (int i = 1; i < pictureHeight - 1; i++) {
                 // if I am in col 1 regardless of which row I am in
-                if (j==1) {
-                    distTo[i][j]=energy[i][j]+distTo[i-1][j-1];
-                    edgeTo[i][j]=i-1;
+                if (j == 1) {
+                    distTo[i][j] = energy[i][j] + distTo[i - 1][j - 1];
+                    edgeTo[i][j] = i - 1;
                 }
                 else if (pictureHeight == 3) {
                     // case 1 - only one row
@@ -144,7 +145,7 @@ public class SeamCarver {
                 }
                 else if (pictureHeight > 3 && i == 1) {
                     // Case 2 - only middle and bottom parent/sum - The first row
-                    middleSum = energy[i][j] + distTo[i ][j - 1];
+                    middleSum = energy[i][j] + distTo[i][j - 1];
                     bottomSum = energy[i][j] + distTo[i + 1][j - 1];
                     if (bottomSum < middleSum) {
                         distTo[i][j] = bottomSum;
@@ -158,7 +159,7 @@ public class SeamCarver {
                 else if (pictureHeight > 3 && i == pictureHeight - 2) {
                     // Case 3 - I am on last row and only have middle and top sum/parent
                     topSum = energy[i][j] + distTo[i - 1][j - 1];
-                    middleSum = energy[i][j] + distTo[i][j -1];
+                    middleSum = energy[i][j] + distTo[i][j - 1];
                     if (middleSum < topSum) {
                         distTo[i][j] = middleSum;
                         edgeTo[i][j] = i;
@@ -206,6 +207,8 @@ public class SeamCarver {
 
     // sequence of indices for vertical seam
     public int[] findVerticalSeam() {
+        double[][] distTo = new double[pictureHeight][pictureWidth];
+        int[][] edgeTo = new int[pictureHeight][pictureWidth];
         double leftSum, middleSum, rightSum;
         for (int i = 1; i < pictureHeight - 1; i++) {
             for (int j = 1; j < pictureWidth - 1; j++) {
@@ -361,7 +364,7 @@ public class SeamCarver {
         }
         System.out.println();
         System.out.println("Here is the distance table for 7x10 file:");
-        seamCarver.printMyTwoDimensionalArray(seamCarver.distTo);
+        // seamCarver.printMyTwoDimensionalArray(seamCarver.distTo);
         System.out.println();
         seamCarver = new SeamCarver(new Picture("3x4.png"));
         System.out.println("Here is the vertical seam for 3x4 file:");
@@ -370,7 +373,7 @@ public class SeamCarver {
         }
         System.out.println();
         System.out.println("Here is the distance table for 3x4 file:");
-        seamCarver.printMyTwoDimensionalArray(seamCarver.distTo);
+        // seamCarver.printMyTwoDimensionalArray(seamCarver.distTo);
         System.out.println();
         seamCarver = new SeamCarver(new Picture("3x7.png"));
         System.out.println("Here is the vertical seam for 3x7 file:");
@@ -379,7 +382,7 @@ public class SeamCarver {
         }
         System.out.println();
         System.out.println("Here is the distance table for 3x7 file:");
-        seamCarver.printMyTwoDimensionalArray(seamCarver.distTo);
+        // seamCarver.printMyTwoDimensionalArray(seamCarver.distTo);
         System.out.println();
         // Vertical seam: { 1 2 1 1 2 1 }
         // 1000.00  1000.00* 1000.00  1000.00
@@ -396,7 +399,7 @@ public class SeamCarver {
             System.out.printf("%d ", i);
         }
         System.out.println("Here is the distance table for 4x6 file:");
-        seamCarver.printMyTwoDimensionalArray(seamCarver.distTo);
+        // seamCarver.printMyTwoDimensionalArray(seamCarver.distTo);
         System.out.println();
     }
 }
