@@ -30,14 +30,14 @@ public class SeamCarver {
         verticalSeam = new int[pictureHeight];
         horizontalSeam = new int[pictureWidth];
 
-        for (int i = 0; i < pictureHeight; i++) {
-            for (int j = 0; j < pictureWidth; j++) {
-                energy[i][j] = energy(j, i);
-                if (i == 0 || i == pictureHeight - 1 || j == 0 || j == pictureWidth - 1) {
-                    distTo[i][j] = energy[i][j];
+        for (int y = 0; y < pictureHeight; y++) {
+            for (int x = 0; x < pictureWidth; x++) {
+                energy[y][x] = energy(x, y);
+                if (y == 0 || y == pictureHeight - 1 || x == 0 || x == pictureWidth - 1) {
+                    distTo[y][x] = energy[y][x];
                 }
                 else {
-                    distTo[i][j] = Double.POSITIVE_INFINITY;
+                    distTo[y][x] = Double.POSITIVE_INFINITY;
                 }
             }
         }
@@ -67,7 +67,7 @@ public class SeamCarver {
     // energy of pixel at column x and row y
     public double energy(int x, int y) {
         verifyCoordinates(x, y);
-        if (x <= 0 || x >= pictureWidth - 1 || y <= 0 || y >= pictureHeight - 1)
+        if (x == 0 || x == pictureWidth - 1 || y == 0 || y == pictureHeight - 1)
             return 1000.00;
         Color left = picture.get(x - 1, y);
         Color right = picture.get(x + 1, y);
@@ -79,12 +79,18 @@ public class SeamCarver {
 
     // calculate x-gradient using the left and right pixelx
     private double getDeltaX(Color right, Color left) {
-        double leftRed = left.getRed();
-        double leftGreen = left.getGreen();
-        double leftBlue = left.getBlue();
-        double rightRed = right.getRed();
-        double rightGreen = right.getGreen();
-        double rightBlue = right.getBlue();
+
+        // double leftRed = left.getRed();
+        int leftRGB = left.getRGB();
+        // int leftAlpha = (leftRGB >> 24) & 0xff;
+        int leftRed = (leftRGB >> 16) & 0xff;
+        int leftGreen = (leftRGB >> 8) & 0xff;
+        int leftBlue = (leftRGB >> 0) & 0xff;
+        int rightRGB = right.getRGB();
+        // int rightAlpha = (rightRGB >> 24) & 0xff;
+        int rightRed = (rightRGB >> 16) & 0xff;
+        int rightGreen = (rightRGB >> 8) & 0xff;
+        int rightBlue = (rightRGB >> 0) & 0xff;
         double result = Math.pow(Math.abs(leftRed - rightRed), 2) + Math.pow(
                 Math.abs(leftGreen - rightGreen), 2) + Math.pow(Math.abs(leftBlue - rightBlue), 2);
         return result;
@@ -93,34 +99,52 @@ public class SeamCarver {
 
     // calculate y-gradient using the bottom and top pixles
     private double getDeltaY(Color bottom, Color top) {
-        double bottomRed = bottom.getRed();
-        double bottomGreen = bottom.getGreen();
-        double bottomBlue = bottom.getBlue();
-        double topRed = top.getRed();
-        double topGreen = top.getGreen();
-        double topBlue = top.getBlue();
+        int bottomRGB = bottom.getRGB();
+        int bottomRed = (bottomRGB >> 16) & 0xff;
+        int bottomGreen = (bottomRGB >> 8) & 0xff;
+        int bottomBlue = (bottomRGB >> 0) & 0xff;
+        int topRGB = top.getRGB();
+        int topRed = (topRGB >> 16) & 0xff;
+        int topGreen = (topRGB >> 8) & 0xff;
+        int topBlue = (topRGB >> 0) & 0xff;
         double result = Math.pow(Math.abs(topRed - bottomRed), 2) + Math.pow(
                 Math.abs(topGreen - bottomGreen), 2) + Math.pow(Math.abs(topBlue - bottomBlue), 2);
         return result;
     }
 
+    private void resetdistToArray() {
+        for (int i = 0; i < pictureHeight; i++) {
+            for (int j = 0; j < pictureWidth; j++) {
+                if (i == 0 || i == pictureHeight - 1 || j == 0 || j == pictureWidth - 1) {
+                    distTo[i][j] = energy[i][j];
+                }
+                else {
+                    distTo[i][j] = Double.POSITIVE_INFINITY;
+                }
+            }
+        }
+    }
+
     // sequence of indices for horizontal seam
     public int[] findHorizontalSeam() {
+        resetdistToArray();
+        edgeTo = new int[pictureHeight][pictureWidth];
         double topSum, middleSum, bottomSum;
         for (int j = 1; j < pictureWidth - 1; j++) {
             for (int i = 1; i < pictureHeight - 1; i++) {
-                if (j == 1) {
-                    distTo[i][j] = energy[i][j];
-                    edgeTo[i][j] = i - 1;
+                // if I am in col 1 regardless of which row I am in
+                if (j==1) {
+                    distTo[i][j]=energy[i][j]+distTo[i-1][j-1];
+                    edgeTo[i][j]=i-1;
                 }
                 else if (pictureHeight == 3) {
-                    // case 1 - only one roow
+                    // case 1 - only one row
                     distTo[i][j] = energy[i][j] + distTo[i][j - 1];
-                    edgeTo[i][j] = i;
+                    edgeTo[i][j] = i -1;
                 }
                 else if (pictureHeight > 3 && i == 1) {
                     // Case 2 - only middle and bottom parent/sum - The first row
-                    middleSum = energy[i][j] + distTo[i][j - 1];
+                    middleSum = energy[i][j] + distTo[i ][j - 1];
                     bottomSum = energy[i][j] + distTo[i + 1][j - 1];
                     if (bottomSum < middleSum) {
                         distTo[i][j] = bottomSum;
@@ -134,7 +158,7 @@ public class SeamCarver {
                 else if (pictureHeight > 3 && i == pictureHeight - 2) {
                     // Case 3 - I am on last row and only have middle and top sum/parent
                     topSum = energy[i][j] + distTo[i - 1][j - 1];
-                    middleSum = energy[i][j] + distTo[i][j - 1];
+                    middleSum = energy[i][j] + distTo[i][j -1];
                     if (middleSum < topSum) {
                         distTo[i][j] = middleSum;
                         edgeTo[i][j] = i;
@@ -148,15 +172,15 @@ public class SeamCarver {
                     topSum = energy[i][j] + distTo[i - 1][j - 1];
                     middleSum = energy[i][j] + distTo[i][j - 1];
                     bottomSum = energy[i][j] + distTo[i + 1][j - 1];
-                    if (bottomSum <= middleSum && bottomSum <= topSum) {
+                    if (bottomSum < middleSum && bottomSum < topSum) {
                         distTo[i][j] = bottomSum;
                         edgeTo[i][j] = i + 1;
                     }
-                    else if (middleSum <= bottomSum && middleSum <= topSum) {
+                    else if (middleSum < bottomSum && middleSum < topSum) {
                         distTo[i][j] = middleSum;
                         edgeTo[i][j] = i;
                     }
-                    else if (topSum <= middleSum && topSum <= bottomSum) {
+                    else {
                         distTo[i][j] = topSum;
                         edgeTo[i][j] = i - 1;
                     }
@@ -198,7 +222,7 @@ public class SeamCarver {
                     // Case 2 - The first
                     rightSum = energy[i][j] + distTo[i - 1][j + 1];
                     middleSum = energy[i][j] + distTo[i - 1][j];
-                    if (rightSum <= middleSum) {
+                    if (rightSum < middleSum) {
                         distTo[i][j] = energy[i][j] + distTo[i - 1][j + 1];
                         edgeTo[i][j] = j + 1;
                     }
@@ -211,7 +235,7 @@ public class SeamCarver {
                     // Case 3 - the last column
                     middleSum = energy[i][j] + distTo[i - 1][j];
                     leftSum = energy[i][j] + distTo[i - 1][j - 1];
-                    if (middleSum <= leftSum) {
+                    if (middleSum < leftSum) {
                         distTo[i][j] = middleSum;
                         edgeTo[i][j] = j;
                     }
@@ -229,11 +253,11 @@ public class SeamCarver {
                         distTo[i][j] = leftSum;
                         edgeTo[i][j] = j - 1;
                     }
-                    else if (middleSum <= leftSum && middleSum <= rightSum) {
+                    else if (middleSum < leftSum && middleSum <= rightSum) {
                         distTo[i][j] = middleSum;
                         edgeTo[i][j] = j;
                     }
-                    else if (rightSum <= leftSum && rightSum <= middleSum) {
+                    else if (rightSum < leftSum && rightSum < middleSum) {
                         distTo[i][j] = rightSum;
                         edgeTo[i][j] = j + 1;
                     }
@@ -315,11 +339,20 @@ public class SeamCarver {
 
     //  unit testing (optional)
     public static void main(String[] args) {
-        SeamCarver seamCarver = new SeamCarver(new Picture("3x4.png"));
+
+        SeamCarver seamCarver = new SeamCarver(new Picture("stripes.png"));
+        System.out.println(
+                "\n Here is the vertical seam for stripes. Expecting: 0 1 1 1 1 1 1 1 1 1 1 0 Getting:");
+        for (int i : seamCarver.findVerticalSeam()) {
+            System.out.printf("%d ", i);
+        }
+
+        seamCarver = new SeamCarver(new Picture("3x4.png"));
         System.out.println("\n Here is the horizontal seam:");
         for (int i : seamCarver.findHorizontalSeam()) {
             System.out.printf("%d ", i);
         }
+
         seamCarver = new SeamCarver(new Picture("7x10.png"));
         System.out.println(
                 "Expecting  2 3 4 3 4 3 3 2 2 1. Here is the vertical seam for 7x10 file:");
