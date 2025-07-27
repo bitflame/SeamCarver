@@ -127,8 +127,8 @@ public class SeamCarver {
 
     // sequence of indices for horizontal seam
     public int[] findHorizontalSeam() {
-        resetdistToArray();
-        edgeTo = new int[pictureHeight][pictureWidth];
+        // resetdistToArray();
+        // edgeTo = new int[pictureHeight][pictureWidth];
         double topSum, middleSum, bottomSum;
         for (int j = 1; j < pictureWidth - 1; j++) {
             for (int i = 1; i < pictureHeight - 1; i++) {
