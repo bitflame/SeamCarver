@@ -140,7 +140,7 @@ public class SeamCarver {
                 else if (pictureHeight == 3) {
                     // case 1 - only one row
                     distTo[i][j] = energy[i][j] + distTo[i][j - 1];
-                    edgeTo[i][j] = i -1;
+                    edgeTo[i][j] = i;
                 }
                 else if (pictureHeight > 3 && i == 1) {
                     // Case 2 - only middle and bottom parent/sum - The first row
