@@ -19,6 +19,8 @@ public class SeamCarver {
 
     // create a seam carver object based on the given picture
     public SeamCarver(Picture picture) {
+        if (picture == null) throw new IllegalArgumentException(
+                "Picture object passed to this method can not be null.");
         this.picture = new Picture(picture);
         pictureHeight = picture.height();
         pictureWidth = picture.width();
@@ -56,8 +58,15 @@ public class SeamCarver {
         return pictureHeight;
     }
 
+    private void verifyCoordinates(int x, int y) {
+        if (x < 0 || x > pictureWidth - 1 || y < 0 || y > pictureHeight - 1)
+            throw new IllegalArgumentException(
+                    "At least one of the Coordinates is not in a valid range.");
+    }
+
     // energy of pixel at column x and row y
     public double energy(int x, int y) {
+        verifyCoordinates(x, y);
         if (x <= 0 || x >= pictureWidth - 1 || y <= 0 || y >= pictureHeight - 1)
             return 1000.00;
         Color left = picture.get(x - 1, y);
@@ -270,12 +279,37 @@ public class SeamCarver {
     }
 
     // remove horizontal seam from current picture
+    // Throw an IllegalArgumentException if removeVerticalSeam() or removeHorizontalSeam() is called
+    // with an array of the wrong length or if the array is not a valid seam (i.e., either an entry
+    // is outside its prescribed range or two adjacent entries differ by more than 1).
     public void removeHorizontalSeam(int[] seam) {
-
+        if (seam == null)
+            throw new IllegalArgumentException("The array passed to this method can not be null.");
+        if (seam.length != pictureWidth)
+            throw new IllegalArgumentException("Horizontal seam length mismatch.");
+        verifySeam(seam, pictureWidth);
+        if (pictureHeight <= 1)
+            throw new IllegalArgumentException("The image height is not large enough.");
     }
 
     // remove vertical seam from current picture
     public void removeVerticalSeam(int[] seam) {
+        if (seam == null)
+            throw new IllegalArgumentException("The array passed to this method can not be null.");
+        if (seam.length != pictureHeight)
+            throw new IllegalArgumentException("Vertical seam length mismatch.");
+        verifySeam(seam, pictureHeight);
+        if (pictureWidth <= 1)
+            throw new IllegalArgumentException("The image width is not large enough.");
+    }
+
+    private void verifySeam(int[] seam, int limit) {
+        int previous = 0;
+        for (int i = 1; i < seam.length; i++) {
+            if (seam[i] < 0 || seam[i] > limit || seam[previous] > seam[i] + 1
+                    || seam[previous] < seam[i] - 1)
+                throw new IllegalArgumentException("The pixel address provided is not valid.");
+        }
 
     }
 
