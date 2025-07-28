@@ -76,7 +76,6 @@ public class SeamCarver {
         double sum = getDeltaX(right, left) + getDeltaY(bottom, top);
         return Math.sqrt(sum);
     }
-
     // calculate x-gradient using the left and right pixelx
     private double getDeltaX(Color right, Color left) {
 
@@ -331,27 +330,18 @@ public class SeamCarver {
         verifySeam(seam, pictureHeight);
         if (pictureWidth <= 1)
             throw new IllegalArgumentException("The image width is not large enough.");
+        Picture updatedPicture = new Picture(pictureWidth-1, pictureHeight);
+        int originalaRGB, updatedaRGB;
         double[][] updatedEnergyArray = new double[pictureHeight][pictureWidth - 1];
         int seamIndex = 0;
         for (int i = 0; i < pictureHeight; i++) {
             System.arraycopy(energy[i], 0, updatedEnergyArray[i], 0, seam[seamIndex]);
             System.arraycopy(energy[i], seam[seamIndex] + 1, updatedEnergyArray[i],
                              seam[seamIndex], pictureWidth - (seam[seamIndex] + 1));
+            originalaRGB = picture.getRGB(seam[seamIndex], i);
             seamIndex++;
         }
-        if (updatedEnergyArray[0].length > 2) {
-            // After creating the updatedEnergyArray, update the cells and write them to the file.
-            // todo - make sure this changes the values
-            seamIndex = 0;
-            for (int i = 0; i < pictureHeight; i++) {
-                energy[i][seam[seamIndex]] = energy(i, seam[seamIndex]);
-            }
-        }
-        else {
-            // if the updated array just has two columns replace the energy array with it and write it to a file
-            energy = updatedEnergyArray;
-        }
-        // todo - write the updated energy table to a file
+
     }
 
     private void verifySeam(int[] seam, int limit) {
