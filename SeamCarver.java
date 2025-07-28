@@ -76,6 +76,7 @@ public class SeamCarver {
         double sum = getDeltaX(right, left) + getDeltaY(bottom, top);
         return Math.sqrt(sum);
     }
+
     // calculate x-gradient using the left and right pixelx
     private double getDeltaX(Color right, Color left) {
 
@@ -330,18 +331,58 @@ public class SeamCarver {
         verifySeam(seam, pictureHeight);
         if (pictureWidth <= 1)
             throw new IllegalArgumentException("The image width is not large enough.");
-        Picture updatedPicture = new Picture(pictureWidth-1, pictureHeight);
-        int originalaRGB, updatedaRGB;
+        Picture updatedPicture = new Picture(pictureWidth - 1, pictureHeight);
         double[][] updatedEnergyArray = new double[pictureHeight][pictureWidth - 1];
         int seamIndex = 0;
         for (int i = 0; i < pictureHeight; i++) {
-            System.arraycopy(energy[i], 0, updatedEnergyArray[i], 0, seam[seamIndex]);
-            System.arraycopy(energy[i], seam[seamIndex] + 1, updatedEnergyArray[i],
-                             seam[seamIndex], pictureWidth - (seam[seamIndex] + 1));
-            originalaRGB = picture.getRGB(seam[seamIndex], i);
+            for (int j = 0; j < pictureWidth; j++) {
+                System.arraycopy(energy[i], 0, updatedEnergyArray[i], 0, seam[seamIndex]);
+                System.arraycopy(energy[i], seam[seamIndex] + 1, updatedEnergyArray[i],
+                                 seam[seamIndex], pictureWidth - (seam[seamIndex] + 1));
+                if (j == 0 || j == pictureWidth - 1) updatedEnergyArray[i][j] = 1000;
+                else if (j < seam[seamIndex]) {
+                    int argb = picture.getRGB(j, i);
+                    updatedPicture.setRGB(j, i, argb);
+                }
+                else {
+                    updatedPicture.setRGB(j - 1, i, picture.getRGB(j, i));
+                }
+            }
+            // Use System.arraycopy for all the cells except the ones next to the cell that was just removed
             seamIndex++;
         }
-
+        energy = updatedEnergyArray;
+        int leftRGB, rightRGB, topRGB, bottomRGB;
+        for (int i = 0; i < pictureHeight; i++) {
+            leftRGB = updatedPicture.getRGB(seam[seamIndex] - 1, i);
+            int leftAlpha = (leftRGB >> 24) & 0xff;
+            int leftRed = (leftRGB >> 16) & 0xff;
+            int leftGreen = (leftRGB >> 8) & 0xff;
+            int leftBlue = (leftRGB >> 0) & 0xff;
+            rightRGB = updatedPicture.getRGB(seam[seamIndex] + 1, i);
+            int rightAlpha = (rightRGB >> 24) & 0xff;
+            int rightRed = (rightRGB >> 16) & 0xff;
+            int rightGreen = (rightRGB >> 8) & 0xff;
+            int rightBlue = (rightRGB >> 0) & 0xff;
+            double deltaX = Math.pow(Math.abs(leftRed - rightRed), 2) + Math.pow(
+                    Math.abs(leftGreen - rightGreen), 2) + Math.pow(Math.abs(leftBlue - rightBlue), 2);
+            topRGB = updatedPicture.getRGB(seam[seamIndex], i - 1);
+            int topAlpha = (topRGB >> 24) & 0xff;
+            int topRed = (topRGB >> 16) & 0xff;
+            int topGreen = (topRGB >> 8) & 0xff;
+            int topBlue = (topRGB >> 0) & 0xff;
+            bottomRGB = updatedPicture.getRGB(seam[seamIndex], i + 1);
+            int bottomAlpha = (bottomRGB >> 24) & 0xff;
+            int bottomRed = (bottomRGB >> 16) & 0xff;
+            int bottomGreen = (bottomRGB >> 8) & 0xff;
+            int bottomBlue = (bottomRGB >> 0) & 0xff;
+            double deltaY = Math.pow(Math.abs(topRed - bottomRed), 2) + Math.pow(
+                    Math.abs(topGreen - bottomGreen), 2) + Math.pow(Math.abs(topBlue - bottomBlue),
+                                                                    2);
+            energy[i][seam[seamIndex]]=Math.sqrt(deltaX+deltaY);
+            seamIndex++;
+        }
+        updatedPicture.save("UpdatedFile.jpg");
     }
 
     private void verifySeam(int[] seam, int limit) {
