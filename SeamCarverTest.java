@@ -41,6 +41,12 @@ public class SeamCarverTest {
     }
 
     @Test
+    public void testRemoveVerticalSeam() {
+        SeamCarver sc = new SeamCarver(picture);
+
+    }
+
+    @Test
     public void testFindVerticalSeam3x7() {
         picture = new Picture("3x7.png");
         SeamCarver sc = new SeamCarver(picture);

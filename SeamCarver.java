@@ -306,9 +306,6 @@ public class SeamCarver {
     }
 
     // remove horizontal seam from current picture
-    // Throw an IllegalArgumentException if removeVerticalSeam() or removeHorizontalSeam() is called
-    // with an array of the wrong length or if the array is not a valid seam (i.e., either an entry
-    // is outside its prescribed range or two adjacent entries differ by more than 1).
     public void removeHorizontalSeam(int[] seam) {
         if (seam == null)
             throw new IllegalArgumentException("The array passed to this method can not be null.");
@@ -317,6 +314,12 @@ public class SeamCarver {
         verifySeam(seam, pictureWidth);
         if (pictureHeight <= 1)
             throw new IllegalArgumentException("The image height is not large enough.");
+        Picture update = new Picture(pictureWidth, pictureHeight);
+        for (int i = 0; i < pictureHeight; i++) {
+            for (int j = 0; j < pictureWidth; j++) {
+
+            }
+        }
     }
 
     // remove vertical seam from current picture
@@ -328,6 +331,16 @@ public class SeamCarver {
         verifySeam(seam, pictureHeight);
         if (pictureWidth <= 1)
             throw new IllegalArgumentException("The image width is not large enough.");
+        double[][] updatedEnergyArray = new double[pictureHeight][pictureWidth - 1];
+        int seamIndex = 0;
+        for (int i = 0; i < pictureHeight; i++) {
+            System.arraycopy(energy[i], 0, updatedEnergyArray[i], 0, seam[seamIndex]);
+            System.arraycopy(energy[i], seam[seamIndex] + 1, updatedEnergyArray[i],
+                             seam[seamIndex], pictureWidth - (seam[seamIndex] +1));
+            seamIndex++;
+        }
+
+
     }
 
     private void verifySeam(int[] seam, int limit) {
@@ -337,19 +350,25 @@ public class SeamCarver {
                     || seam[previous] < seam[i] - 1)
                 throw new IllegalArgumentException("The pixel address provided is not valid.");
         }
-
     }
 
     //  unit testing (optional)
     public static void main(String[] args) {
+        SeamCarver seamCarver = new SeamCarver(new Picture("3x4.png"));
+        seamCarver.removeVerticalSeam(seamCarver.findVerticalSeam());
 
-        SeamCarver seamCarver = new SeamCarver(new Picture("stripes.png"));
+        seamCarver = new SeamCarver(new Picture("stripes.png"));
         System.out.println(
                 "\n Here is the vertical seam for stripes. Expecting: 0 1 1 1 1 1 1 1 1 1 1 0 Getting:");
         for (int i : seamCarver.findVerticalSeam()) {
             System.out.printf("%d ", i);
         }
 
+        for (int i = 0; i < seamCarver.pictureHeight; i++) {
+            for (int j = 0; j < seamCarver.pictureWidth; j++) {
+                System.out.printf(" %9.2f", seamCarver.energy[i][j]);
+            }
+        }
         seamCarver = new SeamCarver(new Picture("3x4.png"));
         System.out.println("\n Here is the horizontal seam:");
         for (int i : seamCarver.findHorizontalSeam()) {
