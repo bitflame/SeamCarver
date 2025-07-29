@@ -312,16 +312,13 @@ public class SeamCarver {
             throw new IllegalArgumentException("The image width is not large enough.");
         Picture updatedPicture = new Picture(pictureWidth - 1, pictureHeight);
         double[][] updatedEnergyArray = new double[pictureHeight][pictureWidth - 1];
-
         int seamIndex = 0;
-        int leftRGB, rightRGB, topRGB, bottomRGB;
         for (int i = 0; i < pictureHeight; i++) {
             for (int j = 0; j < pictureWidth; j++) {
                 System.arraycopy(energy[i], 0, updatedEnergyArray[i], 0, seam[seamIndex]);
                 System.arraycopy(energy[i], seam[seamIndex] + 1, updatedEnergyArray[i],
                                  seam[seamIndex], pictureWidth - (seam[seamIndex] + 1));
-                if (j == 0 || j == pictureWidth - 1) updatedEnergyArray[i][j] = 1000;
-                else if (j < seam[seamIndex]) {
+                if (j < seam[seamIndex]) {
                     int argb = pictureCopy.getRGB(j, i);
                     updatedPicture.setRGB(j, i, argb);
                 }
@@ -329,74 +326,9 @@ public class SeamCarver {
                     updatedPicture.setRGB(j - 1, i, pictureCopy.getRGB(j, i));
                 }
             }
-            // todo - I might be able to add code here to update the energy values for rows 1 and below once I
-            // am on row 3 and beyond. I do need to add the code for row 2 when the top is a border and
-            // last row and first and last columns
-            if (i >= 3) {
-                leftRGB = pictureCopy.getRGB(seam[seamIndex] - 1, i - 2);
-                int leftAlpha = (leftRGB >> 24) & 0xff;
-                int leftRed = (leftRGB >> 16) & 0xff;
-                int leftGreen = (leftRGB >> 8) & 0xff;
-                int leftBlue = (leftRGB >> 0) & 0xff;
-                rightRGB = updatedPicture.getRGB(seam[seamIndex] + 1, i - 2);
-                int rightAlpha = (rightRGB >> 24) & 0xff;
-                int rightRed = (rightRGB >> 16) & 0xff;
-                int rightGreen = (rightRGB >> 8) & 0xff;
-                int rightBlue = (rightRGB >> 0) & 0xff;
-                double deltaX = Math.pow(Math.abs(leftRed - rightRed), 2) + Math.pow(
-                        Math.abs(leftGreen - rightGreen), 2) + Math.pow(
-                        Math.abs(leftBlue - rightBlue), 2);
-                topRGB = updatedPicture.getRGB(seam[seamIndex], i - 3);
-                int topAlpha = (topRGB >> 24) & 0xff;
-                int topRed = (topRGB >> 16) & 0xff;
-                int topGreen = (topRGB >> 8) & 0xff;
-                int topBlue = (topRGB >> 0) & 0xff;
-                bottomRGB = updatedPicture.getRGB(seam[seamIndex], i - 1);
-                int bottomAlpha = (bottomRGB >> 24) & 0xff;
-                int bottomRed = (bottomRGB >> 16) & 0xff;
-                int bottomGreen = (bottomRGB >> 8) & 0xff;
-                int bottomBlue = (bottomRGB >> 0) & 0xff;
-                double deltaY = Math.pow(Math.abs(topRed - bottomRed), 2) + Math.pow(
-                        Math.abs(topGreen - bottomGreen), 2) + Math.pow(
-                        Math.abs(topBlue - bottomBlue),
-                        2);
-                // int argb = (a << 24) | (r << 16) | (g << 8) | (b << 0);
-                updatedEnergyArray[i][seam[seamIndex]] = Math.sqrt(deltaX + deltaY);
-            }
             seamIndex++;
         }
         energy = updatedEnergyArray;
-        // I left the code below here in case the strategy above did not work
-        // for (int i = 0; i < pictureHeight; i++) {
-        //     leftRGB = updatedPicture.getRGB(seam[seamIndex] - 1, i);
-        //     int leftAlpha = (leftRGB >> 24) & 0xff;
-        //     int leftRed = (leftRGB >> 16) & 0xff;
-        //     int leftGreen = (leftRGB >> 8) & 0xff;
-        //     int leftBlue = (leftRGB >> 0) & 0xff;
-        //     rightRGB = updatedPicture.getRGB(seam[seamIndex] + 1, i);
-        //     int rightAlpha = (rightRGB >> 24) & 0xff;
-        //     int rightRed = (rightRGB >> 16) & 0xff;
-        //     int rightGreen = (rightRGB >> 8) & 0xff;
-        //     int rightBlue = (rightRGB >> 0) & 0xff;
-        //     double deltaX = Math.pow(Math.abs(leftRed - rightRed), 2) + Math.pow(
-        //             Math.abs(leftGreen - rightGreen), 2) + Math.pow(Math.abs(leftBlue - rightBlue),
-        //                                                             2);
-        //     topRGB = updatedPicture.getRGB(seam[seamIndex], i - 1);
-        //     int topAlpha = (topRGB >> 24) & 0xff;
-        //     int topRed = (topRGB >> 16) & 0xff;
-        //     int topGreen = (topRGB >> 8) & 0xff;
-        //     int topBlue = (topRGB >> 0) & 0xff;
-        //     bottomRGB = updatedPicture.getRGB(seam[seamIndex], i + 1);
-        //     int bottomAlpha = (bottomRGB >> 24) & 0xff;
-        //     int bottomRed = (bottomRGB >> 16) & 0xff;
-        //     int bottomGreen = (bottomRGB >> 8) & 0xff;
-        //     int bottomBlue = (bottomRGB >> 0) & 0xff;
-        //     double deltaY = Math.pow(Math.abs(topRed - bottomRed), 2) + Math.pow(
-        //             Math.abs(topGreen - bottomGreen), 2) + Math.pow(Math.abs(topBlue - bottomBlue),
-        //                                                             2);
-        //     energy[i][seam[seamIndex]] = Math.sqrt(deltaX + deltaY);
-        //     seamIndex++;
-        // }
         updatedPicture.save("UpdatedFile.jpg");
         pictureCopy = updatedPicture;
     }
