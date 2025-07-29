@@ -351,7 +351,7 @@ public class SeamCarver {
                 int topRed = (topRGB >> 16) & 0xff;
                 int topGreen = (topRGB >> 8) & 0xff;
                 int topBlue = (topRGB >> 0) & 0xff;
-                bottomRGB = updatedPicture.getRGB(seam[seamIndex], i - 1 1);
+                bottomRGB = updatedPicture.getRGB(seam[seamIndex], i - 1);
                 int bottomAlpha = (bottomRGB >> 24) & 0xff;
                 int bottomRed = (bottomRGB >> 16) & 0xff;
                 int bottomGreen = (bottomRGB >> 8) & 0xff;
