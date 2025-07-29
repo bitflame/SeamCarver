@@ -9,7 +9,7 @@ import edu.princeton.cs.algs4.Picture;
 import java.awt.Color;
 
 public class SeamCarver {
-    private Picture picture;
+    private Picture pictureCopy;
     private double[][] energy;
     // private int[][] edgeTo;
     // private double[][] distTo;
@@ -21,31 +21,23 @@ public class SeamCarver {
     public SeamCarver(Picture picture) {
         if (picture == null) throw new IllegalArgumentException(
                 "Picture object passed to this method can not be null.");
-        this.picture = new Picture(picture);
+        this.pictureCopy = new Picture(picture);
         pictureHeight = picture.height();
         pictureWidth = picture.width();
         energy = new double[pictureHeight][pictureWidth];
-        // edgeTo = new int[pictureHeight][pictureWidth];
-        // distTo = new double[pictureHeight][pictureWidth];
         verticalSeam = new int[pictureHeight];
         horizontalSeam = new int[pictureWidth];
-
         for (int y = 0; y < pictureHeight; y++) {
             for (int x = 0; x < pictureWidth; x++) {
                 energy[y][x] = energy(x, y);
-                // if (y == 0 || y == pictureHeight - 1 || x == 0 || x == pictureWidth - 1) {
-                //     distTo[y][x] = energy[y][x];
-                // }
-                // else {
-                //     distTo[y][x] = Double.POSITIVE_INFINITY;
-                // }
             }
         }
+        picture = pictureCopy;
     }
 
     // current picture{
     public Picture picture() {
-        return picture;
+        return pictureCopy;
     }
 
     // width of current picture
@@ -69,10 +61,10 @@ public class SeamCarver {
         verifyCoordinates(x, y);
         if (x == 0 || x == pictureWidth - 1 || y == 0 || y == pictureHeight - 1)
             return 1000.00;
-        Color left = picture.get(x - 1, y);
-        Color right = picture.get(x + 1, y);
-        Color top = picture.get(x, y - 1);
-        Color bottom = picture.get(x, y + 1);
+        Color left = pictureCopy.get(x - 1, y);
+        Color right = pictureCopy.get(x + 1, y);
+        Color top = pictureCopy.get(x, y - 1);
+        Color bottom = pictureCopy.get(x, y + 1);
         double sum = getDeltaX(right, left) + getDeltaY(bottom, top);
         return Math.sqrt(sum);
     }
@@ -111,19 +103,6 @@ public class SeamCarver {
                 Math.abs(topGreen - bottomGreen), 2) + Math.pow(Math.abs(topBlue - bottomBlue), 2);
         return result;
     }
-
-    // private void resetdistToArray() {
-    //     for (int i = 0; i < pictureHeight; i++) {
-    //         for (int j = 0; j < pictureWidth; j++) {
-    //             if (i == 0 || i == pictureHeight - 1 || j == 0 || j == pictureWidth - 1) {
-    //                 distTo[i][j] = energy[i][j];
-    //             }
-    //             else {
-    //                 distTo[i][j] = Double.POSITIVE_INFINITY;
-    //             }
-    //         }
-    //     }
-    // }
 
     // sequence of indices for horizontal seam
     public int[] findHorizontalSeam() {
@@ -333,6 +312,7 @@ public class SeamCarver {
             throw new IllegalArgumentException("The image width is not large enough.");
         Picture updatedPicture = new Picture(pictureWidth - 1, pictureHeight);
         double[][] updatedEnergyArray = new double[pictureHeight][pictureWidth - 1];
+
         int seamIndex = 0;
         int leftRGB, rightRGB, topRGB, bottomRGB;
         for (int i = 0; i < pictureHeight; i++) {
@@ -342,23 +322,23 @@ public class SeamCarver {
                                  seam[seamIndex], pictureWidth - (seam[seamIndex] + 1));
                 if (j == 0 || j == pictureWidth - 1) updatedEnergyArray[i][j] = 1000;
                 else if (j < seam[seamIndex]) {
-                    int argb = picture.getRGB(j, i);
+                    int argb = pictureCopy.getRGB(j, i);
                     updatedPicture.setRGB(j, i, argb);
                 }
                 else {
-                    updatedPicture.setRGB(j - 1, i, picture.getRGB(j, i));
+                    updatedPicture.setRGB(j - 1, i, pictureCopy.getRGB(j, i));
                 }
             }
             // todo - I might be able to add code here to update the energy values for rows 1 and below once I
             // am on row 3 and beyond. I do need to add the code for row 2 when the top is a border and
             // last row and first and last columns
             if (i >= 3) {
-                leftRGB = updatedPicture.getRGB(seam[seamIndex] - 1, i);
+                leftRGB = pictureCopy.getRGB(seam[seamIndex] - 1, i - 2);
                 int leftAlpha = (leftRGB >> 24) & 0xff;
                 int leftRed = (leftRGB >> 16) & 0xff;
                 int leftGreen = (leftRGB >> 8) & 0xff;
                 int leftBlue = (leftRGB >> 0) & 0xff;
-                rightRGB = updatedPicture.getRGB(seam[seamIndex] + 1, i);
+                rightRGB = updatedPicture.getRGB(seam[seamIndex] + 1, i - 2);
                 int rightAlpha = (rightRGB >> 24) & 0xff;
                 int rightRed = (rightRGB >> 16) & 0xff;
                 int rightGreen = (rightRGB >> 8) & 0xff;
@@ -366,12 +346,12 @@ public class SeamCarver {
                 double deltaX = Math.pow(Math.abs(leftRed - rightRed), 2) + Math.pow(
                         Math.abs(leftGreen - rightGreen), 2) + Math.pow(
                         Math.abs(leftBlue - rightBlue), 2);
-                topRGB = updatedPicture.getRGB(seam[seamIndex], i - 1);
+                topRGB = updatedPicture.getRGB(seam[seamIndex], i - 3);
                 int topAlpha = (topRGB >> 24) & 0xff;
                 int topRed = (topRGB >> 16) & 0xff;
                 int topGreen = (topRGB >> 8) & 0xff;
                 int topBlue = (topRGB >> 0) & 0xff;
-                bottomRGB = updatedPicture.getRGB(seam[seamIndex], i + 1);
+                bottomRGB = updatedPicture.getRGB(seam[seamIndex], i - 1 1);
                 int bottomAlpha = (bottomRGB >> 24) & 0xff;
                 int bottomRed = (bottomRGB >> 16) & 0xff;
                 int bottomGreen = (bottomRGB >> 8) & 0xff;
@@ -380,6 +360,7 @@ public class SeamCarver {
                         Math.abs(topGreen - bottomGreen), 2) + Math.pow(
                         Math.abs(topBlue - bottomBlue),
                         2);
+                // int argb = (a << 24) | (r << 16) | (g << 8) | (b << 0);
                 updatedEnergyArray[i][seam[seamIndex]] = Math.sqrt(deltaX + deltaY);
             }
             seamIndex++;
@@ -417,6 +398,7 @@ public class SeamCarver {
         //     seamIndex++;
         // }
         updatedPicture.save("UpdatedFile.jpg");
+        pictureCopy = updatedPicture;
     }
 
     private void verifySeam(int[] seam, int limit) {
@@ -430,7 +412,7 @@ public class SeamCarver {
 
     //  unit testing (optional)
     public static void main(String[] args) {
-        SeamCarver seamCarver = new SeamCarver(new Picture("3x4.png"));
+        SeamCarver seamCarver = new SeamCarver(new Picture("4x6.png"));
         seamCarver.removeVerticalSeam(seamCarver.findVerticalSeam());
 
         seamCarver = new SeamCarver(new Picture("stripes.png"));
