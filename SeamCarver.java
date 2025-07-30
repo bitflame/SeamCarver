@@ -256,7 +256,10 @@ public class SeamCarver {
             }
         }
         int rowCounter = pictureHeight - 1;
-        verticalSeam[rowCounter--] = minIndex - 1;
+        if (minIndex > 0) {
+            verticalSeam[rowCounter--] = minIndex - 1;
+        }
+        else verticalSeam[rowCounter--] = minIndex;
         do {
             verticalSeam[rowCounter] = minIndex;
             minIndex = edgeTo[rowCounter--][minIndex];
@@ -290,12 +293,12 @@ public class SeamCarver {
             throw new IllegalArgumentException("The array passed to this method can not be null.");
         if (seam.length != pictureWidth)
             throw new IllegalArgumentException("Horizontal seam length mismatch.");
-        verifySeam(seam, pictureWidth);
+        verifySeam(seam, pictureHeight);
         if (pictureHeight <= 1)
             throw new IllegalArgumentException("The image height is not large enough.");
-        Picture updatedPicture = new Picture(pictureHeight - 1, pictureWidth);
+        // Picture updatedPicture = new Picture(pictureHeight - 1, pictureWidth);
         Picture transposedPicture = new Picture(pictureHeight, pictureWidth);
-        double[][] updatedEnergyArray = new double[pictureWidth][pictureHeight - 1];
+        // double[][] updatedEnergyArray = new double[pictureWidth][pictureHeight - 1];
         double[][] transposedEnergyBuffer = new double[pictureWidth][pictureHeight];
         for (int i = 0; i < pictureHeight; i++) {
             for (int j = 0; j < pictureWidth; j++) {
@@ -303,38 +306,50 @@ public class SeamCarver {
                 transposedPicture.setRGB(i, j, pictureCopy.getRGB(j, i));
             }
         }
-        int seamIndex = 0;
-        for (int i = 0; i < pictureWidth; i++) {
-            for (int j = 0; j < pictureHeight; j++) {
-                System.arraycopy(transposedEnergyBuffer[i], 0, updatedEnergyArray[i], 0,
-                                 seam[seamIndex]);
-                System.arraycopy(transposedEnergyBuffer[i], seam[seamIndex] + 1,
-                                 updatedEnergyArray[i],
-                                 seam[seamIndex], pictureHeight - (seam[seamIndex] + 1));
-                if (j < seam[seamIndex]) {
-                    updatedPicture.setRGB(j, i, transposedPicture.getRGB(j, i));
-                }
-                else if (j > seam[seamIndex]) {
-                    updatedPicture.setRGB(j - 1, i, transposedPicture.getRGB(j, i));
-                }
-            }
-            seamIndex++;
-        }
+        // transposedPicture.save("UpdatedFile.png");
+        pictureCopy = transposedPicture;
+        pictureWidth = pictureCopy.width();
+        pictureHeight = pictureCopy.height();
+        energy = transposedEnergyBuffer;
+        removeVerticalSeam(seam);
+        // int seamIndex = 0;
+        // for (int i = 0; i < pictureWidth; i++) {
+        //     for (int j = 0; j < pictureHeight; j++) {
+        //         System.arraycopy(transposedEnergyBuffer[i], 0, updatedEnergyArray[i], 0,
+        //                          seam[seamIndex]);
+        //         System.arraycopy(transposedEnergyBuffer[i], seam[seamIndex] + 1,
+        //                          updatedEnergyArray[i],
+        //                          seam[seamIndex], pictureHeight - (seam[seamIndex] + 1));
+        //         if (j < seam[seamIndex]) {
+        //             updatedPicture.setRGB(j, i, transposedPicture.getRGB(j, i));
+        //         }
+        //         else if (j > seam[seamIndex]) {
+        //             updatedPicture.setRGB(j - 1, i, transposedPicture.getRGB(j, i));
+        //         }
+        //     }
+        //     seamIndex++;
+        // }
         // now tanspose the energy array and the picture back...
-        for (int i = 0; i < pictureWidth; i++) {
-            for (int j = 0; j < pictureHeight; j++) {
-                energy[j][i] = transposedEnergyBuffer[i][j];
+        // for (int i = 0; i < pictureWidth; i++) {
+        //     for (int j = 0; j < pictureHeight; j++) {
+        //         energy[j][i] = transposedEnergyBuffer[i][j];
+        //     }
+        // }
+        // pictureCopy = new Picture(updatedPicture.height(), updatedPicture.width());
+        transposedPicture = new Picture(pictureCopy.height(),pictureCopy.width());
+        transposedEnergyBuffer = new double[pictureWidth][pictureHeight];
+        for (int i = 0; i < pictureCopy.height(); i++) {
+            for (int j = 0; j < pictureCopy.width(); j++) {
+                transposedPicture.setRGB(i, j, pictureCopy.getRGB(j, i));
+                transposedEnergyBuffer[j][i]=energy[i][j];
             }
         }
-        pictureCopy = new Picture(updatedPicture.height(), updatedPicture.width());
-        for (int i = 0; i < updatedPicture.height(); i++) {
-            for (int j = 0; j < updatedPicture.width(); j++) {
-                pictureCopy.setRGB(i, j, updatedPicture.getRGB(j, i));
-            }
-        }
+        energy = transposedEnergyBuffer;
+        pictureCopy = transposedPicture;
         // energy = updatedEnergyArray;
         // pictureCopy.save("UpdatedFile.png");
         pictureHeight = pictureCopy.height();
+        pictureWidth = pictureCopy.width();
         // pictureWidth = pictureCopy.width();
         verticalSeam = new int[pictureHeight];
         horizontalSeam = new int[pictureWidth];
@@ -346,7 +361,7 @@ public class SeamCarver {
             throw new IllegalArgumentException("The array passed to this method can not be null.");
         if (seam.length != pictureHeight)
             throw new IllegalArgumentException("Vertical seam length mismatch.");
-        verifySeam(seam, pictureHeight);
+        verifySeam(seam, pictureWidth);
         if (pictureWidth <= 1)
             throw new IllegalArgumentException("The image width is not large enough.");
         Picture updatedPicture = new Picture(pictureWidth - 1, pictureHeight);
@@ -370,13 +385,13 @@ public class SeamCarver {
         // updatedPicture.save("UpdatedFile.png");
         pictureCopy = updatedPicture;
         pictureWidth = pictureCopy.width();
+        horizontalSeam = new int[pictureWidth];
     }
 
     private void verifySeam(int[] seam, int limit) {
-        int previous = 0;
         for (int i = 1; i < seam.length; i++) {
-            if (seam[i] < 0 || seam[i] > limit || seam[previous] > seam[i] + 1
-                    || seam[previous] < seam[i] - 1)
+            if (seam[i] < 0 || seam[i] > limit || seam[i] > seam[i] + 1
+                    || seam[i] < seam[i] - 1)
                 throw new IllegalArgumentException("The pixel address provided is not valid.");
         }
     }

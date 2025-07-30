@@ -249,4 +249,14 @@ public class SeamCarverTest {
         int[] expectedSeam = { 0, 1, 1, 1, 1, 1, 1, 1, 0 };
         Assert.assertArrayEquals(expectedSeam, actualSeam);
     }
+
+    @Test
+    public void testFindVerticalSean1x8() {
+        picture = new Picture("1x8.png");
+        SeamCarver sc = new SeamCarver(picture);
+        int[] actualSeam = sc.findVerticalSeam();
+        int[] expectedSeam = { 0, 0, 0, 0, 0, 0, 0 ,0};
+        Assert.assertArrayEquals(expectedSeam, actualSeam);
+    }
+
 }
