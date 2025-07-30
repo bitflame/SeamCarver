@@ -333,9 +333,9 @@ public class SeamCarver {
             }
         }
         // energy = updatedEnergyArray;
-        pictureCopy.save("UpdatedFile.png");
+        // pictureCopy.save("UpdatedFile.png");
         pictureHeight = pictureCopy.height();
-        pictureWidth = pictureCopy.width();
+        // pictureWidth = pictureCopy.width();
         verticalSeam = new int[pictureHeight];
         horizontalSeam = new int[pictureWidth];
     }
@@ -367,8 +367,9 @@ public class SeamCarver {
             seamIndex++;
         }
         energy = updatedEnergyArray;
-        updatedPicture.save("UpdatedFile.png");
+        // updatedPicture.save("UpdatedFile.png");
         pictureCopy = updatedPicture;
+        pictureWidth = pictureCopy.width();
     }
 
     private void verifySeam(int[] seam, int limit) {
@@ -384,7 +385,7 @@ public class SeamCarver {
     public static void main(String[] args) {
         SeamCarver seamCarver = new SeamCarver(new Picture("4x6.png"));
         seamCarver.removeHorizontalSeam(seamCarver.findHorizontalSeam());
-        // seamCarver.removeVerticalSeam(seamCarver.findVerticalSeam());
+        seamCarver.removeVerticalSeam(seamCarver.findVerticalSeam());
 
         seamCarver = new SeamCarver(new Picture("stripes.png"));
         System.out.println(
