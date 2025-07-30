@@ -1,3 +1,9 @@
 The test file shows how to traverse a two dimensional array in a column major way. What
 worked for me was to switch the i, and j lines and leave everything else the same.
 Remember i still refers to the row and j refers to the column
+
+But I could not avoid having to transpose the two dimensinal arrays and Picture
+objects because System.arraycopy still copies one row at a time. This would have
+still worked if I only wanted to do one thing inside the nested loop. But I wanted
+to update the energy array and the Picture objects. In addition to that, most
+images had different height and width.
