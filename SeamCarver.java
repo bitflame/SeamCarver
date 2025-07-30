@@ -33,6 +33,7 @@ public class SeamCarver {
             }
         }
         picture = pictureCopy;
+
     }
 
     // current picture{
@@ -318,18 +319,17 @@ public class SeamCarver {
                 System.arraycopy(energy[i], 0, updatedEnergyArray[i], 0, seam[seamIndex]);
                 System.arraycopy(energy[i], seam[seamIndex] + 1, updatedEnergyArray[i],
                                  seam[seamIndex], pictureWidth - (seam[seamIndex] + 1));
-                if (j < seam[seamIndex]) {
-                    int argb = pictureCopy.getRGB(j, i);
-                    updatedPicture.setRGB(j, i, argb);
+                if (j<seam[seamIndex]) {
+                    updatedPicture.setRGB(j, i, pictureCopy.getRGB(j, i));
                 }
-                else {
-                    updatedPicture.setRGB(j - 1, i, pictureCopy.getRGB(j, i));
+                else if (j>seam[seamIndex]) {
+                    updatedPicture.setRGB(j-1,i,pictureCopy.getRGB(j,i));
                 }
             }
             seamIndex++;
         }
         energy = updatedEnergyArray;
-        updatedPicture.save("UpdatedFile.jpg");
+        updatedPicture.save("UpdatedFile.png");
         pictureCopy = updatedPicture;
     }
 
