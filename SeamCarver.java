@@ -33,7 +33,6 @@ public class SeamCarver {
             }
         }
         picture = pictureCopy;
-
     }
 
     // current picture{
@@ -294,12 +293,51 @@ public class SeamCarver {
         verifySeam(seam, pictureWidth);
         if (pictureHeight <= 1)
             throw new IllegalArgumentException("The image height is not large enough.");
-        Picture update = new Picture(pictureWidth, pictureHeight);
+        Picture updatedPicture = new Picture(pictureHeight - 1, pictureWidth);
+        Picture transposedPicture = new Picture(pictureHeight, pictureWidth);
+        double[][] updatedEnergyArray = new double[pictureWidth][pictureHeight - 1];
+        double[][] transposedEnergyBuffer = new double[pictureWidth][pictureHeight];
         for (int i = 0; i < pictureHeight; i++) {
             for (int j = 0; j < pictureWidth; j++) {
-
+                transposedEnergyBuffer[j][i] = energy[i][j];
+                transposedPicture.setRGB(i, j, pictureCopy.getRGB(j, i));
             }
         }
+        int seamIndex = 0;
+        for (int i = 0; i < pictureWidth; i++) {
+            for (int j = 0; j < pictureHeight; j++) {
+                System.arraycopy(transposedEnergyBuffer[i], 0, updatedEnergyArray[i], 0,
+                                 seam[seamIndex]);
+                System.arraycopy(transposedEnergyBuffer[i], seam[seamIndex] + 1,
+                                 updatedEnergyArray[i],
+                                 seam[seamIndex], pictureHeight - (seam[seamIndex] + 1));
+                if (j < seam[seamIndex]) {
+                    updatedPicture.setRGB(j, i, transposedPicture.getRGB(j, i));
+                }
+                else if (j > seam[seamIndex]) {
+                    updatedPicture.setRGB(j - 1, i, transposedPicture.getRGB(j, i));
+                }
+            }
+            seamIndex++;
+        }
+        // now tanspose the energy array and the picture back...
+        for (int i = 0; i < pictureWidth; i++) {
+            for (int j = 0; j < pictureHeight; j++) {
+                energy[j][i] = transposedEnergyBuffer[i][j];
+            }
+        }
+        pictureCopy = new Picture(updatedPicture.height(), updatedPicture.width());
+        for (int i = 0; i < updatedPicture.height(); i++) {
+            for (int j = 0; j < updatedPicture.width(); j++) {
+                pictureCopy.setRGB(i, j, updatedPicture.getRGB(j, i));
+            }
+        }
+        // energy = updatedEnergyArray;
+        pictureCopy.save("UpdatedFile.png");
+        pictureHeight = pictureCopy.height();
+        pictureWidth = pictureCopy.width();
+        verticalSeam = new int[pictureHeight];
+        horizontalSeam = new int[pictureWidth];
     }
 
     // remove vertical seam from current picture
@@ -319,11 +357,11 @@ public class SeamCarver {
                 System.arraycopy(energy[i], 0, updatedEnergyArray[i], 0, seam[seamIndex]);
                 System.arraycopy(energy[i], seam[seamIndex] + 1, updatedEnergyArray[i],
                                  seam[seamIndex], pictureWidth - (seam[seamIndex] + 1));
-                if (j<seam[seamIndex]) {
+                if (j < seam[seamIndex]) {
                     updatedPicture.setRGB(j, i, pictureCopy.getRGB(j, i));
                 }
-                else if (j>seam[seamIndex]) {
-                    updatedPicture.setRGB(j-1,i,pictureCopy.getRGB(j,i));
+                else if (j > seam[seamIndex]) {
+                    updatedPicture.setRGB(j - 1, i, pictureCopy.getRGB(j, i));
                 }
             }
             seamIndex++;
@@ -345,7 +383,8 @@ public class SeamCarver {
     //  unit testing (optional)
     public static void main(String[] args) {
         SeamCarver seamCarver = new SeamCarver(new Picture("4x6.png"));
-        seamCarver.removeVerticalSeam(seamCarver.findVerticalSeam());
+        seamCarver.removeHorizontalSeam(seamCarver.findHorizontalSeam());
+        // seamCarver.removeVerticalSeam(seamCarver.findVerticalSeam());
 
         seamCarver = new SeamCarver(new Picture("stripes.png"));
         System.out.println(
